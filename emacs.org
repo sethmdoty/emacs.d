@@ -17,14 +17,16 @@
       - [[#org][Org]]
       - [[#company][Company]]
     - [[#languages][Languages]]
+      - [[#docker][Docker]]
+      - [[#golang][Golang]]
       - [[#lsp-mode][LSP Mode]]
       - [[#javascript][Javascript]]
       - [[#json][JSON]]
+      - [[#rust][Rust]]
       - [[#terraform][Terraform]]
       - [[#web][Web]]
       - [[#python][Python]]
       - [[#markdown][Markdown]]
-      - [[#scheme][Scheme]]
       - [[#lua][Lua]]
       - [[#yaml][YAML]]
   - [[#review-and-remove][Review and remove]]
@@ -202,16 +204,6 @@ Set titlebar style
   (add-hook 'delete-frame-functions (lambda () (interactive)(save-some-buffers t)))
 #+END_SRC
 
-*** Replace beginning of line with context-dependent 'jump-to-beginning'
-#+BEGIN_SRC emacs-lisp
-  (defun back-to-indentation-or-beginning ()
-    "Replace jump-to-beginning with jump-to-indentation."
-    (interactive)
-   (if (= (point) (progn (back-to-indentation) (point)))
-       (beginning-of-line)))
-
-  (global-set-key (kbd "C-a") 'back-to-indentation-or-beginning)
-#+END_SRC
 
 *** Provide custom buffer-cleanup functions
 #+BEGIN_SRC emacs-lisp
@@ -236,7 +228,12 @@ Set titlebar style
   (setq mac-option-modifier nil))
 
 #+END_SRC
-
+*** VsCode Icons
+#+Begin_SRC emacs-lisp
+(use-package vscode-icon
+  :ensure t
+  :commands (vscode-icon-for-file))
+#+END_SRC
 ** Buffer Colorize
 #+BEGIN_SRC emacs-lisp
 ;; load package
@@ -268,11 +265,6 @@ We don't want that annoying floating frame that ediff uses by default.
   :config
   (load-theme 'monokai t))
 
-(use-package golden-ratio-scroll-screen
-  :ensure t
-  :bind(([remap scroll-down-command] . golden-ratio-scroll-screen-down)
-        ([remap scroll-up-command] . golden-ratio-scroll-screen-up)))
-
 (use-package undo-tree
   :ensure t
   :diminish undo-tree-mode
@@ -289,7 +281,22 @@ We don't want that annoying floating frame that ediff uses by default.
   :ensure t)
 
 (use-package dired-sidebar
-  :ensure t)
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+  (setq dired-sidebar-subtree-line-prefix "__")
+  (setq dired-sidebar-theme 'vscode)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t))
 
 (use-package ibuffer
   :bind( "C-x C-b" . ibuffer))
@@ -297,11 +304,6 @@ We don't want that annoying floating frame that ediff uses by default.
 (use-package ibuffer-sidebar
   :after (ibuffer)
   :ensure t)
-
-(use-package editorconfig
-  :ensure t
-  :config
-  (editorconfig-mode 1))
 
 (use-package smex
   :ensure t)
@@ -319,26 +321,6 @@ We don't want that annoying floating frame that ediff uses by default.
    '(aw-leading-char-face
      ((t (:inherit ace-jump-face-foreground :height 3.0))))))
 
-(use-package multiple-cursors
-  :ensure t
-  :bind("C-c m" . hydra-multiple-cursors/body))
-
-(defhydra hydra-multiple-cursors (:hint nil)
-  "
-       ^Up^            ^Down^        ^Miscellaneous^
-  ----------------------------------------------
-  [_p_]   Next    [_n_]   Next    [_l_] Edit lines
-  [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
-  [_M-p_] Unmark  [_M-n_] Unmark  [_q_] Quit"
-  ("l" mc/edit-lines :exit t)
-  ("a" mc/mark-all-like-this :exit t)
-  ("n" mc/mark-next-like-this)
-  ("N" mc/skip-to-next-like-this)
-  ("M-n" mc/unmark-next-like-this)
-  ("p" mc/mark-previous-like-this)
-  ("P" mc/skip-to-previous-like-this)
-  ("M-p" mc/unmark-previous-like-this)
-  ("q" nil))
 
 (use-package switch-buffer-functions
   :ensure t
@@ -366,10 +348,6 @@ We don't want that annoying floating frame that ediff uses by default.
   (prog-mode . yas-minor-mode)
   :config
   (yas-reload-all))
-
-(use-package duplicate-thing
-  :ensure t
-  :bind(("C-c C-d" . duplicate-thing)))
 
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns x))
@@ -401,11 +379,6 @@ We don't want that annoying floating frame that ediff uses by default.
                   (projectile-project-name))))
   :config
   (projectile-mode))
-
-(use-package expand-region
-  :ensure t
-  :bind(("C-=" . er/expand-region)
-        ("C--" . er/contract-region)))
 
 (use-package diminish
   :ensure t
@@ -609,12 +582,30 @@ ad-do-it))
   :config
   (company-quickhelp-mode))
 
-;; (use-package company-box
-;;   :ensure t
-;;   :hook (company-mode . company-box-mode))
 #+END_SRC
 
 *** Languages
+**** Docker
+#+BEGIN_SRC emacs-lisp
+(use-package docker-compose-mode
+  :ensure t)
+(use-package dockerfile-mode
+  :ensure t)
+(use-package dotenv-mode
+  :ensure t)
+#+END_SRC
+**** Golang
+#+BEGIN_SRC emacs-lisp
+(defun my-go-mode-hook ()
+  (add-hook 'before-save-hook 'gofmt-before-save))
+(use-package go-mode
+  :ensure t
+  :hook (go-mode-hook my-go-mode-hook))
+(use-package company-go
+  :ensure t)
+(use-package flymake-go
+  :ensure t)
+#+END_SRC
 **** LSP Mode
 Lsp allows us to utilize the same interface to multiple languages
 
@@ -686,9 +677,25 @@ Lsp allows us to utilize the same interface to multiple languages
      ("\\manifest.webapp\\'" . json-mode )
      ("\\.tern-project\\'" . json-mode)))
 #+END_SRC
+**** Rust
+#+BEGIN_SRC emacs-lisp
+(use-package rust-mode
+   :ensure t )
+
+(use-package cargo
+   :ensure t
+   :hook (rust-mode cargo-minor-mode))
+
+(use-package flycheck-rust
+   :ensure t
+   :hook (flycheck-mode-hook #'flycheck-rust-setup))
+#+END_SRC
 **** Terraform
 #+Begin_SRC emacs-lisp
   (use-package terraform-mode
+    :ensure t )
+
+  (use-package company-terraform
     :ensure t )
 #+END_SRC
 
@@ -746,7 +753,15 @@ Lsp allows us to utilize the same interface to multiple languages
 #+BEGIN_SRC emacs-lisp
   (use-package python-mode
     :ensure t)
+  
+  (use-package blacken
+    :ensure t)
 
+  (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+  
+  (use-package jedi
+    :ensure t)
+  
   (use-package company-jedi
     :ensure t
     :init
@@ -765,24 +780,6 @@ Lsp allows us to utilize the same interface to multiple languages
     (setq markdown-command "multimarkdown")
     (setq markdown-header-scaling t))
 #+END_SRC
-
-**** Scheme
-#+BEGIN_SRC emacs-lisp
-(use-package geiser
-  :ensure t
-  :init
-  (setq geiser-chez-binary "chez")
-  (setq geiser-active-implementations '(chez)))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-  :ensure t
-  :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
-
-#+RESULTS:
-| rainbow-delimiters-mode | rainbow-delimeters-mode | geiser-mode--maybe-activate |
 
 **** Lua
 #+BEGIN_SRC emacs-lisp
