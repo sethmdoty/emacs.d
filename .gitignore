@@ -1,0 +1,14 @@
+# Specify filepatterns you want git to ignore.
+.cache/*
+.python-environments/*
+backups/*
+elpa/*
+.lsp*
+newsticker/*
+url/*
+transient/*
+smex-*
+recent*
+projectile-bookmarks*
+forge-database*
+emacs.el
