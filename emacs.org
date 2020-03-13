@@ -613,11 +613,14 @@ Lsp allows us to utilize the same interface to multiple languages
 (use-package lsp-mode
   :ensure t
   :commands lsp
+  :config
   :hook 
    (js-mode . lsp)
    (terraform-mode . lsp)
    (sh-mode . lsp))
    
+(use-package lsp-rust
+   :after lsp-mode)
 
 (use-package lsp-ui
   :ensure t
@@ -684,7 +687,9 @@ Lsp allows us to utilize the same interface to multiple languages
 **** Rust
 #+BEGIN_SRC emacs-lisp
 (use-package rust-mode
-   :ensure t )
+   :ensure t
+   :init
+   (setq rust-format-on-save t))
 
 (use-package cargo
    :ensure t
