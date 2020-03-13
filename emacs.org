@@ -613,7 +613,11 @@ Lsp allows us to utilize the same interface to multiple languages
 (use-package lsp-mode
   :ensure t
   :commands lsp
-  :hook (js-mode . lsp))
+  :hook 
+   (js-mode . lsp)
+   (terraform-mode . lsp)
+   (sh-mode . lsp))
+   
 
 (use-package lsp-ui
   :ensure t
@@ -759,13 +763,11 @@ Lsp allows us to utilize the same interface to multiple languages
 
   (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
   
-  (use-package jedi
-    :ensure t)
-  
-  (use-package company-jedi
-    :ensure t
-    :init
-    (add-hook 'python-mode-hook (add-to-list 'company-backends 'company-jedi)))
+  (use-package lsp-python-ms
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp))))  ; or lsp-deferred
 #+END_SRC
 
 **** Markdown
