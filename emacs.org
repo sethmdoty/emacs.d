@@ -479,8 +479,6 @@ We don't want that annoying floating frame that ediff uses by default.
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1 )
   :bind("C-x g" . magit-status)
   :config
-  (magit-define-popup-switch 'magit-push-popup
-  ?t "Follow tags" "--follow-tags")
   ;; Protect against accident pushes to upstream
   (defadvice magit-push-current-to-upstream
 (around my-protect-accidental-magit-push-current-to-upstream)
