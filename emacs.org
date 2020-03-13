@@ -617,7 +617,7 @@ Lsp allows us to utilize the same interface to multiple languages
    (js-mode . lsp)
    (terraform-mode . lsp)
    (sh-mode . lsp))
-   
+
 (use-package lsp-rust
    :after lsp-mode)
 
@@ -693,13 +693,22 @@ Lsp allows us to utilize the same interface to multiple languages
    :init
    (setq rust-format-on-save t))
 
-(use-package cargo
-   :ensure t
-   :hook (rust-mode cargo-minor-mode))
+(use-package lsp-rust
+  :demand t
+  :after rust-mode)
 
 (use-package flycheck-rust
-   :ensure t
-   :hook (flycheck-mode-hook #'flycheck-rust-setup))
+  :ensure t
+  :hook (flycheck-mode-hook #'flycheck-rust-setup))
+
+(use-package cargo
+  :ensure t
+  :hook (rust-mode cargo-minor-mode))
+
+;; Toml:
+(use-package toml-mode
+  :defer t
+  :config (progn (add-hook 'toml-mode-hook 'prog-minor-modes-common)))
 #+END_SRC
 **** Terraform
 #+Begin_SRC emacs-lisp
@@ -707,7 +716,8 @@ Lsp allows us to utilize the same interface to multiple languages
     :ensure t )
 
   (use-package company-terraform
-    :ensure t )
+    :ensure t
+    :config (company-terraform-init) )
 #+END_SRC
 
 **** Web
