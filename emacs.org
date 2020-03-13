@@ -629,7 +629,10 @@ Lsp allows us to utilize the same interface to multiple languages
   :ensure t
   :commands company-lsp
   :config
-  (push 'company-lsp company-backends))
+  (push 'company-lsp company-backends)
+  :custom
+   (company-lsp-enable-snippet t)
+   (company-lsp-cache-candidates t))
 #+END_SRC
 
 **** Javascript
