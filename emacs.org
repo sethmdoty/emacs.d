@@ -350,6 +350,9 @@ We don't want that annoying floating frame that ediff uses by default.
   :config
   (yas-reload-all))
 
+(use-package yasnippet-snippets
+  :ensure t)
+
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns x))
   :ensure t
