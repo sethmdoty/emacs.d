@@ -466,6 +466,10 @@ We don't want that annoying floating frame that ediff uses by default.
   (use-package helm-ag
     :ensure t
     :after (helm))
+  
+  (use-package helm-rg
+    :ensure t
+    :after (helm))
 
   (use-package helm-company
     :ensure t
@@ -560,7 +564,10 @@ ad-do-it))
 
     (use-package ob-browser
       :ensure t)
-
+    
+    (use-package org-super-agenda
+      :ensure t)
+    
     (use-package toc-org
       :ensure t
       :after org
