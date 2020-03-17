@@ -612,7 +612,7 @@ ad-do-it))
     (setq org-agenda-files (list "~/Documents/org/notes.org"
                                  "~/Documents/org/todo.org"
                                  "~/Documents/org/personal.org"))
-        :bind
+    :bind
     (("C-c l" . 'org-store-link)
      ("C-c a" . 'org-agenda))
     :config
@@ -628,7 +628,7 @@ ad-do-it))
        (js . t))))
 
     (use-package org-protocol)
-
+    
     (use-package ob-restclient
       :ensure t)
 
@@ -644,11 +644,14 @@ ad-do-it))
       :hook (org-mode . toc-org-enable))
 #+END_SRC
 ***** Org Templates Config
-****** This allows me to copture emails from mu4e.  It links to the actual email when it makes a task
+(t) allows me to copture emails from mu4e.  It links to the actual email when it makes a task
+(l) copies the contents of my clipboard and paste it as a new entry
 #+BEGIN_SRC emacs-lisp
 (setq org-capture-templates
       '(("t" "todo" entry (file+headline "~/Documents/org/todo.org" "Tasks")
-         "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")))
+         "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+      ("l" "Link" plain (file (concat org-directory "~/Documents/org/links.org"))
+         "- %?\n %x\n")))
 #+END_SRC
 **** Company
 #+BEGIN_SRC emacs-lisp
