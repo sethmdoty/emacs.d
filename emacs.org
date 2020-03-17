@@ -12,9 +12,11 @@
   - [[#ediff][Ediff]]
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
+      - [[#mu4e][MU4E]]
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
+        - [[#org-templates-config][Org Templates Config]]
       - [[#company][Company]]
     - [[#languages][Languages]]
       - [[#docker][Docker]]
@@ -230,7 +232,7 @@ Set titlebar style
 
 #+END_SRC
 *** VsCode Icons
-#+Begin_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package vscode-icon
   :ensure t
   :commands (vscode-icon-for-file))
@@ -411,6 +413,69 @@ We don't want that annoying floating frame that ediff uses by default.
   (setq olivetti-body-width 80))
 #+END_SRC
 
+**** MU4E
+NOTE: This is still a bit experimental, but the basics function.  Lots of improvements are still possible.
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
+(use-package mu4e
+  :config
+  (setq mu4e-mu-binary "/usr/local/bin/mu")
+  (setq user-full-name "Seth Doty")
+  (setq user-mail-address "sethmdoty@icloud.com")
+  (setq mail-user-agent 'mu4e-user-agent)
+  (setq mu4e-maildir "~/.mbox")
+  (setq mu4e-refile-folder "/icloud/Archive")
+  (setq mu4e-sent-folder "/icloud/Sent Mail")
+  (setq mu4e-trash-folder "/icloud/Trash")
+  (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
+  (setq mu4e-update-interval 300)
+  (setq mu4e-view-show-images t)
+  (setq mu4e-use-fancy-chars t)
+  (setq mu4e-view-show-images t)
+  (setq mail-user-agent 'mu4e-user-agent)
+  ;; org mode links
+  (setq org-mu4e-link-query-in-headers-mode nil)
+  ;; This enabled the thread like viewing of emails.
+  (setq mu4e-headers-include-related t)
+  (setq mu4e-attachment-dir  "~/Downloads")
+  ;; This prevents saving the email to the Sent folder since my email will do this for us on their end.
+  (setq mu4e-sent-messages-behavior 'delete)
+  ;;so many buffers...
+  (setq message-kill-buffer-on-exit t)
+  ;; Enable inline images.
+  (setq mu4e-view-show-images t)
+  ;; Sometimes html email is just not readable in a text based client, this lets me open the
+  ;; email in my browser.
+  (defun jcs-view-in-eww (msg)
+  (eww-browse-url (concat "file://" (mu4e~write-body-to-html msg))))
+   ;; Arrange to view messages in either the default browser or EWW
+  (add-to-list 'mu4e-view-actions '("ViewInBrowser" . mu4e-action-view-in-browser) t)
+  (add-to-list 'mu4e-view-actions '("Eww view" . jcs-view-in-eww) t)
+  ;; Get some Org functionality in compose buffer
+  (add-hook 'message-mode-hook 'turn-on-orgtbl)
+  (add-hook 'message-mode-hook 'turn-on-orgstruct++)
+  ;; Spell checking, because spelling is hard.
+  (add-hook 'mu4e-compose-mode-hook 'flyspell-mode)
+  
+  ;; Configure sending mail.
+  (setq mu4e-compose-format-flowed t)
+  (setq message-send-mail-function 'message-send-mail-with-sendmail
+	sendmail-program "/usr/local/bin/msmtp")
+	
+  ;; Bookmarks for common searches that I use.
+  (setq mu4e-bookmarks '(("\\\\Inbox" "Inbox" ?i)
+			 ("flag:unread" "Unread messages" ?u)
+			 ("date:today..now" "Today's messages" ?t)
+			 ("date:7d..now" "Last 7 days" ?w)
+			 ("mime:image/*" "Messages with images" ?p))))
+ 
+ (use-package org-mu4e
+    :ensure nil
+    :custom
+    (org-mu4e-convert-to-html t))
+
+#+END_SRC
+
 **** Helm
 #+BEGIN_SRC emacs-lisp
   (use-package helm
@@ -468,6 +533,10 @@ We don't want that annoying floating frame that ediff uses by default.
     :after (helm))
   
   (use-package helm-rg
+    :ensure t
+    :after (helm))
+
+  (use-package helm-mu
     :ensure t
     :after (helm))
 
@@ -541,6 +610,7 @@ ad-do-it))
     (setq org-startup-indented t)
     (setq org-fontify-whole-heading-line t)
     (setq org-agenda-files (list "~/Documents/org/notes.org"
+                                 "~/Documents/org/todo.org"
                                  "~/Documents/org/personal.org"))
         :bind
     (("C-c l" . 'org-store-link)
@@ -573,7 +643,13 @@ ad-do-it))
       :after org
       :hook (org-mode . toc-org-enable))
 #+END_SRC
-
+***** Org Templates Config
+****** This allows me to copture emails from mu4e.  It links to the actual email when it makes a task
+#+BEGIN_SRC emacs-lisp
+(setq org-capture-templates
+      '(("t" "todo" entry (file+headline "~/Documents/org/todo.org" "Tasks")
+         "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")))
+#+END_SRC
 **** Company
 #+BEGIN_SRC emacs-lisp
 (use-package company
