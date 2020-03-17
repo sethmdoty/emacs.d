@@ -433,6 +433,7 @@ We don't want that annoying floating frame that ediff uses by default.
   :ensure t
   :init
   (setq olivetti-body-width 80))
+
 #+END_SRC
 
 **** MU4E
@@ -451,9 +452,7 @@ NOTE: This is still a bit experimental, but the basics function.  Lots of improv
   (setq mu4e-trash-folder "/icloud/Trash")
   (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
   (setq mu4e-update-interval 300)
-  (setq mu4e-view-show-images t)
   (setq mu4e-use-fancy-chars t)
-  (setq mu4e-view-show-images t)
   (setq mail-user-agent 'mu4e-user-agent)
   ;; org mode links
   (setq org-mu4e-link-query-in-headers-mode nil)
@@ -478,7 +477,11 @@ NOTE: This is still a bit experimental, but the basics function.  Lots of improv
   (add-hook 'message-mode-hook 'turn-on-orgstruct++)
   ;; Spell checking, because spelling is hard.
   (add-hook 'mu4e-compose-mode-hook 'flyspell-mode)
-  
+  ;; Prefer Plain Text over HTML
+  (setq mu4e-view-html-plaintext-ratio-heuristic  most-positive-fixnum)
+  ;;let the text flow
+  (setq mu4e-compose-format-flowed t)
+  (add-hook 'mu4e-compose-mode-hook 'visual-clean)  
   ;; Configure sending mail.
   (setq mu4e-compose-format-flowed t)
   (setq message-send-mail-function 'message-send-mail-with-sendmail
@@ -533,7 +536,6 @@ NOTE: This is still a bit experimental, but the basics function.  Lots of improv
     :ensure nil
     :custom
     (org-mu4e-convert-to-html t))
-
 #+END_SRC
 
 **** Helm
