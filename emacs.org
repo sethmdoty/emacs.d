@@ -18,6 +18,7 @@
       - [[#org][Org]]
         - [[#org-templates-config][Org Templates Config]]
       - [[#company][Company]]
+      - [[#deft][Deft]]
     - [[#languages][Languages]]
       - [[#docker][Docker]]
       - [[#golang][Golang]]
@@ -678,7 +679,34 @@ ad-do-it))
     (("C-c l" . 'org-store-link)
      ("C-c a" . 'org-agenda))
     :config
-    
+    (setq org-directory "~/Documents/org/")
+     ;; Split up the search string on whitespace
+    (setq org-agenda-search-view-always-boolean t)
+    ;;Set Keywords
+      (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+          (sequence "WAITING(w)" "|" "CANCELLED(c)")))
+    ;; Log when task complete
+    (setq org-log-done t)
+    ;; Behaviour for capturing notes using make-capture-frame
+    (defadvice org-capture-finalize
+      (after delete-capture-frame activate)
+    "Advise capture-finalize to close the frame"
+    (if (equal "capture" (frame-parameter nil 'name))
+        (delete-frame)))
+
+  (defadvice org-capture-destroy
+      (after delete-capture-frame activate)
+    "Advise capture-destroy to close the frame"
+    (if (equal "capture" (frame-parameter nil 'name))
+        (delete-frame)))
+
+  (defadvice org-switch-to-buffer-other-window
+      (after supress-window-splitting activate)
+    "Delete the extra window if we're in a capture frame"
+    (if (equal "capture" (frame-parameter nil 'name))
+        (delete-other-windows)))
+    ;;What languages do we care to do
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((restclient . t)
@@ -712,8 +740,8 @@ ad-do-it))
 (setq org-capture-templates
       '(("t" "todo" entry (file+headline "~/Documents/org/todo.org" "Tasks")
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-      ("l" "Link" plain (file (concat org-directory "~/Documents/org/links.org"))
-         "- %?\n %x\n")))
+      ("l" "Link from browser" entry (file "~/Documents/org/links.org")
+	 "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")))
 #+END_SRC
 **** Company
 #+BEGIN_SRC emacs-lisp
@@ -732,6 +760,19 @@ ad-do-it))
   :config
   (company-quickhelp-mode))
 
+#+END_SRC
+**** Deft
+I need a better way to search through my org notes.  If I can find it with this, a ripgrep will usually get the job done.
+#+BEGIN_SRC emacs-lisp
+(use-package deft
+  :ensure t
+  :bind ("<f8>" . deft)
+  :commands (deft)
+  :config
+  (setq deft-extensions '("txt" "tex" "org"))
+  (setq deft-directory "~/Documents/org")
+  (setq deft-recursive t)
+  (setq deft-use-filename-as-title t))
 #+END_SRC
 
 *** Languages
