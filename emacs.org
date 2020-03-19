@@ -449,12 +449,14 @@ NOTE: This is still a bit experimental, but the basics function.  Lots of improv
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-maildir "~/.mbox")
   (setq mu4e-refile-folder "/icloud/Archive")
-  (setq mu4e-sent-folder "/icloud/Sent Mail")
-  (setq mu4e-trash-folder "/icloud/Trash")
+  (setq mu4e-sent-folder "/icloud/Sent Messages")
+  (setq mu4e-trash-folder "/icloud/Deleted Items")
   (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
   (setq mu4e-update-interval 300)
   (setq mu4e-use-fancy-chars t)
   (setq mail-user-agent 'mu4e-user-agent)
+  ;; We could get duplicate UIDs from mbsync if we don't do this
+  (setq mu4e-change-filenames-when-moving t)
   ;; org mode links
   (setq org-mu4e-link-query-in-headers-mode nil)
   ;; This enabled the thread like viewing of emails.
@@ -495,43 +497,43 @@ NOTE: This is still a bit experimental, but the basics function.  Lots of improv
 			 ("date:7d..now" "Last 7 days" ?w)
 			 ("mime:image/*" "Messages with images" ?p))))
 ;; icloud and gmail contexts
-;; (setq mu4e-contexts
-;;       `( ,(make-mu4e-context
-;;           :name "gmail"
-;;           :enter-func (lambda () (mu4e-message "Entering Gmail context"))
-;;           :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
-;;           ;; we match based on the maildir of the message
-;; 		  :match-func (lambda (msg)
-;;                         (when msg
-;;                           (string-match-p "^/gmail" (mu4e-message-field msg :maildir))))
-;;           :vars '( ( user-mail-address . "youremail@gmail.com"  )
-;; 				   (smtpmail-smtp-user . "youremail")
-;; 				   ( smtpmail-smtp-server . "smtp.gmail.com" )
-;;                    ( user-full-name . "Your Name" )
-;; 				   ( mu4e-trash-folder . "/gmail/[Gmail].Trash" )
-;; 				   ( mu4e-refile-folder . "/gmail/[Gmail].Archive" )
-;; 				   ( mu4e-drafts-folder . "/gmail/[Gmail].Drafts" )
-;;                    ( mu4e-compose-signature .
-;;                      (concat
-;;                        "Your Name\n"))))
-;;        ,(make-mu4e-context
-;;           :name "icloud"
-;;           :enter-func (lambda () (mu4e-message "Entering the icloud context"))
-;; 		  :leave-func (lambda () (mu4e-message "Leaving icloud context"))
-;;           ;; we match based on the maildir of the message
-;;           :match-func (lambda (msg)
-;;                         (when msg
-;;                           (string-match-p "^/icloud" (mu4e-message-field msg :maildir))))
-;;           :vars '( ( user-mail-address . "sethmdoty@icloud.com" )
-;; 				   ( smtpmail-smtp-user . "sethmdoty@icloud.com" )
-;; 				   ( smtpmail-smtp-server . "" )
-;;                    ( user-full-name . "Your Name" )
-;; 				   ( mu4e-trash-folder . "/icloud/Deleted Items" )
-;; 				   ( mu4e-refile-folder . "/icloud/Archive" )
-;; 				   ( mu4e-drafts-folder . "/icloud/Drafts" )
-;;                    ( mu4e-compose-signature  .
-;;                      (concat
-;;                        "Your Name\n"))))))
+(setq mu4e-contexts
+      `( ,(make-mu4e-context
+          :name "gmail"
+          :enter-func (lambda () (mu4e-message "Entering Gmail context"))
+          :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
+          ;; we match based on the maildir of the message
+		  :match-func (lambda (msg)
+                        (when msg
+                          (string-match-p "^/gmail" (mu4e-message-field msg :maildir))))
+          :vars '( ( user-mail-address . "seth.doty@objectpartners.com"  )
+				   (smtpmail-smtp-user . "seth.doty@objectpartners.com")
+				   ( smtpmail-smtp-server . "smtp.gmail.com" )
+                   ( user-full-name . "Seth Doty" )
+				   ( mu4e-trash-folder . "/gmail/[Gmail].Trash" )
+				   ( mu4e-refile-folder . "/gmail/[Gmail].Archive" )
+				   ( mu4e-drafts-folder . "/gmail/[Gmail].Drafts" )
+                   ( mu4e-compose-signature .
+                     (concat
+                       "Seth Doty\n"))))
+       ,(make-mu4e-context
+          :name "icloud"
+          :enter-func (lambda () (mu4e-message "Entering the icloud context"))
+		  :leave-func (lambda () (mu4e-message "Leaving icloud context"))
+          ;; we match based on the maildir of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (string-match-p "^/icloud" (mu4e-message-field msg :maildir))))
+          :vars '( ( user-mail-address . "sethmdoty@icloud.com" )
+				   ( smtpmail-smtp-user . "sethmdoty@icloud.com" )
+				   ( smtpmail-smtp-server . "" )
+                   ( user-full-name . "Seth Dotye" )
+				   ( mu4e-trash-folder . "/icloud/Deleted Items" )
+				   ( mu4e-refile-folder . "/icloud/Archive" )
+				   ( mu4e-drafts-folder . "/icloud/Drafts" )
+                   ( mu4e-compose-signature  .
+                     (concat
+                       "Seth Doty\n"))))))
  
  (use-package org-mu4e
     :ensure nil
