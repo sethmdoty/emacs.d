@@ -821,6 +821,10 @@ Lsp allows us to utilize the same interface to multiple languages
   :ensure t
   :commands lsp-ui-mode)
 
+(use-package helm-lsp
+  :ensure t
+  :commands helm-lsp-workspace-symbol)
+
 (use-package company-lsp
   :ensure t
   :commands company-lsp
@@ -1016,9 +1020,3 @@ Lsp allows us to utilize the same interface to multiple languages
 #+END_SRC
 
 ** Review and remove
-
-This is an issue with Emacs 27 on Mac OS
-#+BEGIN_SRC emacs-lisp
-(delete-file "~/Library/Colors/Emacs.clr")
-#+END_SRC
-
