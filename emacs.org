@@ -452,7 +452,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (setq mu4e-maildir "~/.mbox")
   (setq mu4e-refile-folder "/icloud/Archive")
   (setq mu4e-sent-folder "/icloud/Sent Messages")
-  (setq mu4e-trash-folder "/icloud/Deleted Items")
+  (setq mu4e-trash-folder "/icloud/Deleted Messages")
   (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
   (setq mu4e-update-interval 300)
   (setq mu4e-use-fancy-chars t)
@@ -530,7 +530,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 				   ( smtpmail-smtp-user . "sethmdoty@icloud.com" )
 				   ( smtpmail-smtp-server . "" )
                    ( user-full-name . "Seth Dotye" )
-				   ( mu4e-trash-folder . "/icloud/Deleted Items" )
+				   ( mu4e-trash-folder . "/icloud/Deleted Messages" )
 				   ( mu4e-refile-folder . "/icloud/Archive" )
 				   ( mu4e-drafts-folder . "/icloud/Drafts" )
                    ( mu4e-compose-signature  .
