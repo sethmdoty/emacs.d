@@ -776,11 +776,21 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
 (t) allows me to copture emails from mu4e.  It links to the actual email when it makes a task
 (l) copies the contents of my clipboard and paste it as a new entry
 #+BEGIN_SRC emacs-lisp
+(defun org-journal-find-location ()
+  ;; Open today's journal, but specify a non-nil prefix argument in order to
+  ;; inhibit inserting the heading; org-capture will insert the heading.
+  (org-journal-new-entry t)
+  ;; Position point on the journal's top-level heading so that org-capture
+  ;; will add the new entry as a child entry.
+  (goto-char (point-min)))
+
 (setq org-capture-templates
       '(("t" "todo" entry (file+headline "~/Documents/org/todo.org" "Tasks")
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("l" "Link from browser" entry (file "~/Documents/org/links.org")
-	 "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")))
+	 "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")
+      ("j" "Journal entry" entry (function org-journal-find-location)
+                               "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
 #+END_SRC
 ***** Org Journal
 #+BEGIN_SRC emacs-lisp
@@ -802,7 +812,7 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
     (find-file (get-journal-file-yesterday)))
   :custom
   (org-journal-date-format "%e %b %Y (%A)")
-  (org-journal-dir (format "~/Documents/org/" (format-time-string "%Y")))
+  (org-journal-dir (format "~/Documents/org/journal/" (format-time-string "%Y")))
   (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
