@@ -16,8 +16,11 @@
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
+        - [[#org-bullets][Org Bullets]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-templates-config][Org Templates Config]]
+        - [[#org-roam][Org Roam]]
+        - [[#org-journal][Org Journal]]
       - [[#company][Company]]
       - [[#deft][Deft]]
     - [[#languages][Languages]]
@@ -764,6 +767,14 @@ ad-do-it))
       :after org
       :hook (org-mode . toc-org-enable))
 #+END_SRC
+***** Org Bullets
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :ensure t
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("●" "►" "▸")))
+#+END_SRC
 ***** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
 #+BEGIN_SRC emacs-lisp
@@ -780,6 +791,31 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("l" "Link from browser" entry (file "~/Documents/org/links.org")
 	 "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")))
+#+END_SRC
+***** Org Journal
+#+BEGIN_SRC emacs-lisp
+(use-package org-journal
+  :after org
+  :ensure t
+  :bind (("C-c T" . org-journal-new-entry)
+         ("C-c Y" . journal-file-yesterday))
+  :preface
+  (defun get-journal-file-yesterday ()
+    "Gets filename for yesterday's journal entry."
+    (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
+           (daily-name (format-time-string "%Y%m%d" yesterday)))
+      (expand-file-name (concat org-journal-dir daily-name))))
+
+  (defun journal-file-yesterday ()
+    "Creates and load a file based on yesterday's date."
+    (interactive)
+    (find-file (get-journal-file-yesterday)))
+  :custom
+  (org-journal-date-format "%e %b %Y (%A)")
+  (org-journal-dir (format "~/Documents/org/" (format-time-string "%Y")))
+  (org-journal-enable-encryption t)
+  (org-journal-file-format "%Y%m%d")
+  (org-journal-time-format ""))
 #+END_SRC
 **** Company
 #+BEGIN_SRC emacs-lisp
