@@ -16,6 +16,7 @@
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
+        - [[#org-cliplink][Org-cliplink]]
         - [[#org-templates-config][Org Templates Config]]
       - [[#company][Company]]
       - [[#deft][Deft]]
@@ -762,6 +763,13 @@ ad-do-it))
       :ensure t
       :after org
       :hook (org-mode . toc-org-enable))
+#+END_SRC
+***** Org-cliplink
+org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
+#+BEGIN_SRC emacs-lisp
+(use-package org-cliplink
+  :ensure t
+  :bind ("C-x p i" . org-cliplink))
 #+END_SRC
 ***** Org Templates Config
 (t) allows me to copture emails from mu4e.  It links to the actual email when it makes a task
