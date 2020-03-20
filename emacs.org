@@ -541,6 +541,32 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
     :ensure nil
     :custom
     (org-mu4e-convert-to-html t))
+
+;;I need alerts.  this uses the terminal-notifier library for osx.  
+;;Make sure it is in your PATH
+;;Gmail makes poor choices, so I have to specificy an inbox for the alert.....
+(use-package mu4e-alert
+  :ensure t
+  :after mu4e
+  :config
+  (mu4e-alert-set-default-style 'notifier)
+  :init
+  (setq mu4e-alert-interesting-mail-query
+    (concat
+     "flag:unread maildir:/icloud/INBOX "
+     "OR "
+     "flag:unread maildir:/gmail/INBOX"
+     ))
+  (mu4e-alert-enable-mode-line-display)
+  (defun gjstein-refresh-mu4e-alert-mode-line ()
+    (interactive)
+    (mu4e~proc-kill)
+    (mu4e-alert-enable-mode-line-display)
+    )
+
+  ;; display stuff on modeline as well as notify
+  (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
 #+END_SRC
 
 **** Helm
