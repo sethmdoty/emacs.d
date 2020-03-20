@@ -16,10 +16,8 @@
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
-        - [[#org-bullets][Org Bullets]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-templates-config][Org Templates Config]]
-        - [[#org-roam][Org Roam]]
         - [[#org-journal][Org Journal]]
       - [[#company][Company]]
       - [[#deft][Deft]]
@@ -766,14 +764,6 @@ ad-do-it))
       :ensure t
       :after org
       :hook (org-mode . toc-org-enable))
-#+END_SRC
-***** Org Bullets
-#+BEGIN_SRC emacs-lisp
-(use-package org-bullets
-  :ensure t
-  :hook (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("●" "►" "▸")))
 #+END_SRC
 ***** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
