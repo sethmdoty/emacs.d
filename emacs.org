@@ -712,6 +712,8 @@ ad-do-it))
     (setq org-directory "~/Documents/org/")
      ;; Split up the search string on whitespace
     (setq org-agenda-search-view-always-boolean t)
+    ;;Do not make last capture bookmarks.  I do not like them
+    (setq org-capture-bookmark nil)
     ;;Set Keywords
       (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
