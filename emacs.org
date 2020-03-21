@@ -16,6 +16,7 @@
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
+        - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-templates-config][Org Templates Config]]
         - [[#org-journal][Org Journal]]
@@ -764,6 +765,18 @@ ad-do-it))
       :ensure t
       :after org
       :hook (org-mode . toc-org-enable))
+#+END_SRC
+***** Org Crypt
+This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
+will be automatically encrypted when saved. Preventing tag inheritance prevevts encrypted text inside encrypted text.  More can be found in the org
+mode manual here: https://orgmode.org/worg/org-tutorials/encrypting-files.html
+#+BEGIN_SRC emacs-lisp
+(require 'org-crypt)
+(org-crypt-use-before-save-magic)
+(setq org-tags-exclude-from-inheritance (quote ("crypt")))
+;; GPG key to use for encryption
+;; Either the Key ID or set to nil to use symmetric encryption.
+(setq org-crypt-key nil)
 #+END_SRC
 ***** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
