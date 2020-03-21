@@ -704,9 +704,7 @@ ad-do-it))
     (setq org-edit-src-content-indentation 0)
     (setq org-startup-indented t)
     (setq org-fontify-whole-heading-line t)
-    (setq org-agenda-files (list "~/Documents/org/notes.org"
-                                 "~/Documents/org/todo.org"
-                                 "~/Documents/org/personal.org"))
+    (setq org-agenda-files (list "~/Documents/org"))
     :bind
     (("C-c l" . 'org-store-link)
      ("C-c a" . 'org-agenda))
@@ -788,7 +786,9 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
       '(("t" "todo" entry (file+headline "~/Documents/org/todo.org" "Tasks")
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("l" "Link from browser" entry (file "~/Documents/org/links.org")
-	 "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")
+	     "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")
+      ("p" "Project Entry" entry (file "~/Documents/org/projects.org")
+         "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("j" "Journal entry" entry (function org-journal-find-location)
                                "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
 #+END_SRC
