@@ -13,6 +13,7 @@
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
       - [[#mu4e][MU4E]]
+        - [[#mu4e-encryption][MU4E Encryption]]
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
@@ -570,6 +571,22 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   ;; display stuff on modeline as well as notify
   (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
   (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
+#+END_SRC
+***** MU4E Encryption
+#+BEGIN_SRC emacs-lisp
+(require 'mml2015)
+(require 'epa-file)
+
+(defun encrypt-message (&optional arg)
+  (interactive "p")
+  (mml-secure-message-encrypt-pgp))
+
+(defun decrypt-message (&optional arg)
+  (interactive "p")
+  (epa-decrypt-armor-in-region (point-min) (point-max)))
+
+(defalias 'ec 'encrypt-message)
+(defalias 'dc 'decrypt-message)
 #+END_SRC
 
 **** Helm
