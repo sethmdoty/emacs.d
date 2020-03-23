@@ -14,6 +14,7 @@
     - [[#general][General]]
       - [[#mu4e][MU4E]]
         - [[#mu4e-encryption][MU4E Encryption]]
+        - [[#mu4e-contacts][MU4E Contacts]]
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
@@ -21,6 +22,7 @@
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-templates-config][Org Templates Config]]
         - [[#org-journal][Org Journal]]
+        - [[#org-caldav][Org Caldav]]
       - [[#company][Company]]
       - [[#deft][Deft]]
     - [[#languages][Languages]]
@@ -46,18 +48,18 @@
 First we're going to add [[melpa.org][melpa]] as a source for packages
 
 #+BEGIN_SRC emacs-lisp
- (require 'package)
- (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                     (not (gnutls-available-p))))
-        (proto (if no-ssl "http" "https")))
-   ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-   ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
-   (when (< emacs-major-version 24)
-     ;; For important compatibility libraries like cl-lib
-     (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
- (package-initialize)
- (set-frame-font "Fira Code Retina 12" nil t)
+(require 'package)
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+(package-initialize)
+(set-frame-font "Fira Code Retina 12" nil t)
  #+END_SRC
 
 
@@ -451,12 +453,12 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   :config
   (setq mu4e-mu-binary "/usr/local/bin/mu")
   (setq user-full-name "Seth Doty")
-  (setq user-mail-address "sethmdoty@icloud.com")
+  (setq user-mail-address "sethmdoty@posteo.net")
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-maildir "~/.mbox")
-  (setq mu4e-refile-folder "/icloud/Archive")
-  (setq mu4e-sent-folder "/icloud/Sent Messages")
-  (setq mu4e-trash-folder "/icloud/Deleted Messages")
+  (setq mu4e-refile-folder "/posteo/Archive")
+  (setq mu4e-sent-folder "/posteo/Sent")
+  (setq mu4e-trash-folder "/posteo/Trash")
   (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
   (setq mu4e-update-interval 300)
   (setq mu4e-use-fancy-chars t)
@@ -502,7 +504,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 			 ("date:today..now" "Today's messages" ?t)
 			 ("date:7d..now" "Last 7 days" ?w)
 			 ("mime:image/*" "Messages with images" ?p))))
-;; icloud and gmail contexts
+;; icloud, posteo, and gmail contexts
 (setq mu4e-contexts
       `( ,(make-mu4e-context
           :name "gmail"
@@ -523,6 +525,24 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
                      (concat
                        "Seth Doty\n"))))
        ,(make-mu4e-context
+          :name "posteo"
+          :enter-func (lambda () (mu4e-message "Entering the posteo context"))
+		  :leave-func (lambda () (mu4e-message "Leaving posteo context"))
+          ;; we match based on the maildir of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (string-match-p "^/posteo" (mu4e-message-field msg :maildir))))
+          :vars '( ( user-mail-address . "sethmdoty@posteo.net" )
+				   ( smtpmail-smtp-user . "sethmdoty@posteo.net" )
+				   ( smtpmail-smtp-server . "" )
+                   ( user-full-name . "Seth Doty" )
+				   ( mu4e-trash-folder . "/posteo/Trash" )
+				   ( mu4e-refile-folder . "/posteo/Archive" )
+				   ( mu4e-drafts-folder . "/posteo/Drafts" )
+                   ( mu4e-compose-signature  .
+                     (concat
+                       "Seth Doty\n"))))
+       ,(make-mu4e-context
           :name "icloud"
           :enter-func (lambda () (mu4e-message "Entering the icloud context"))
 		  :leave-func (lambda () (mu4e-message "Leaving icloud context"))
@@ -533,7 +553,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
           :vars '( ( user-mail-address . "sethmdoty@icloud.com" )
 				   ( smtpmail-smtp-user . "sethmdoty@icloud.com" )
 				   ( smtpmail-smtp-server . "" )
-                   ( user-full-name . "Seth Dotye" )
+                   ( user-full-name . "Seth Doty" )
 				   ( mu4e-trash-folder . "/icloud/Deleted Messages" )
 				   ( mu4e-refile-folder . "/icloud/Archive" )
 				   ( mu4e-drafts-folder . "/icloud/Drafts" )
@@ -557,7 +577,9 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   :init
   (setq mu4e-alert-interesting-mail-query
     (concat
-     "flag:unread maildir:/icloud/INBOX "
+     "flag:unread maildir:/icloud/INBOX"
+     "OR "
+     "flag:unread maildir:/posteo/INBOX"
      "OR "
      "flag:unread maildir:/gmail/INBOX"
      ))
@@ -588,7 +610,14 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 (defalias 'ec 'encrypt-message)
 (defalias 'dc 'decrypt-message)
 #+END_SRC
-
+***** MU4E Contacts
+#+BEGIN_SRC emacs-lisp
+  (setq mu4e-org-contacts-file "~/Documents/org/contacts.org")
+  (add-to-list 'mu4e-headers-actions
+    '("org-contact-add" . mu4e-action-add-org-contact) t)
+  (add-to-list 'mu4e-view-actions
+    '("org-contact-add" . mu4e-action-add-org-contact) t)
+#+END_SRC emacs-lisp
 **** Helm
 #+BEGIN_SRC emacs-lisp
   (use-package helm
@@ -712,7 +741,6 @@ ad-do-it))
 **** Org
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :ensure t
     :init
     (setq org-src-fontify-natively t)
     (setq org-src-tab-acts-natively t)
@@ -805,6 +833,9 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
 ***** Org Templates Config
 (t) allows me to copture emails from mu4e.  It links to the actual email when it makes a task
 (l) copies the contents of my clipboard and paste it as a new entry
+(p) allows me to add projects
+(j) creates a journal entry
+(c) is a contact entry
 #+BEGIN_SRC emacs-lisp
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -819,6 +850,8 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("l" "Link from browser" entry (file "~/Documents/org/links.org")
 	     "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")
+      ("c" "Contact" entry (file+headline "~/Documents/org/contacts.org" "Contacts")
+       "* %?\nPROPERTIES:\n:ADDRESS:\n:BIRTHDAY:\n:EMAIL:\n:NOTE:\n:END:\n")
       ("p" "Project Entry" entry (file "~/Documents/org/projects.org")
          "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
       ("j" "Journal entry" entry (function org-journal-find-location)
@@ -848,6 +881,57 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
   (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
+#+END_SRC
+***** Org Caldav
+#+BEGIN_SRC emacs-lisp
+;; Tracking this bug: https://github.com/dengste/org-caldav/issues/189
+;; (use-package org-caldav
+;;   :after org
+;;   :ensure t
+;;   :init
+;;  ;; This is the sync on close function; it also prompts for save after syncing so 
+;;  ;; no late changes get lost 
+;;   (defun org-caldav-sync-at-close ()
+;;    (org-caldav-sync)
+;;    (save-some-buffers))
+  
+;;   ;;This is the delayed sync function; it waits until emacs has been idle for 
+;;   ;;"secs" seconds before syncing.  The delay is important because the caldav-sync
+;;   ;;can take five or ten seconds, which would be painful if it did that right at save.  
+;;   ;;This way it just waits until you've been idle for a while to avoid disturbing 
+;;   ;;the user.
+;;   (defvar org-caldav-sync-timer nil
+;;     "Timer that `org-caldav-push-timer' used to reschedule itself, or nil.")
+;;   (defun org-caldav-sync-with-delay (secs)
+;;    (when org-caldav-sync-timer
+;;      (cancel-timer org-caldav-sync-timer))
+;;    (setq org-caldav-sync-timer
+;; 	 (run-with-idle-timer
+;; 	  (* 1 secs) nil 'org-caldav-sync)))
+  
+;;   ;;Actual calendar configuration edit this to meet your specific needs
+;;   (setq org-caldav-url "https://posteo.de:8443/calendars/sethmdoty/default/")
+;;   (setq org-caldav-calendars
+;;     '((:calendar-id "default"
+;; 	    	:files ("~/Documents/org/posteo-default.org")
+;; 		:inbox "~/Documents/org/org-caldav-inbox.org")))
+;; 	(setq org-caldav-backup-file "~/Documents/org/org-posteo-backup.org")
+;;   (setq org-caldav-save-directory "~/Documents/org/org-caldav/"))
+;;   :config
+;;   (setq org-icalendar-alarm-time 1)
+;;   ;;This makes sure to-do items as a category can show up on the calendar
+;;   (setq org-icalendar-include-todo t)
+;;   ;;This ensures all org "deadlines" show up, and show up as due dates
+;;   (setq org-icalendar-use-deadline '(event-if-todo event-if-not-todo todo-due))
+;;   ;;This ensures "scheduled" org items show up, and show up as start times
+;;   (setq org-icalendar-use-scheduled '(todo-start event-if-todo event-if-not-todo))
+;;   ;;Add the delayed save hook with a five minute idle timer
+;;   (add-hook 'after-save-hook
+;; 	   (lambda ()
+;; 	     (when (eq major-mode 'org-mode)
+;; 		(org-caldav-sync-with-delay 300))))
+;;   ;;Add the close emacs hook
+;;   (add-hook 'kill-emacs-hook 'org-caldav-sync-at-close))
 #+END_SRC
 **** Company
 #+BEGIN_SRC emacs-lisp
