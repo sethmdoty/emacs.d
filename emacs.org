@@ -747,6 +747,7 @@ ad-do-it))
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :ensure org-plus-contrib
+    :pin org
     :init
     (setq org-src-fontify-natively t)
     (setq org-src-tab-acts-natively t)
