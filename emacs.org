@@ -504,7 +504,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 	sendmail-program "/usr/local/bin/msmtp")
 	
   ;; Bookmarks for common searches that I use.
-  (setq mu4e-bookmarks '(("\\\\Inbox" "Inbox" ?i)
+  (setq mu4e-bookmarks '(("(maildir:/icloud/inbox OR maildir:/gmail/inbox OR maildir:/posteo/INBOX)" "Inbox" ?i)
 			 ("flag:unread" "Unread messages" ?u)
 			 ("date:today..now" "Today's messages" ?t)
 			 ("date:7d..now" "Last 7 days" ?w)
