@@ -14,7 +14,6 @@
     - [[#general][General]]
       - [[#mu4e][MU4E]]
         - [[#mu4e-encryption][MU4E Encryption]]
-        - [[#mu4e-contacts][MU4E Contacts]]
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
@@ -615,14 +614,6 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 (defalias 'ec 'encrypt-message)
 (defalias 'dc 'decrypt-message)
 #+END_SRC
-***** MU4E Contacts
-#+BEGIN_SRC emacs-lisp
-  (setq mu4e-org-contacts-file "~/Documents/org/contacts.org")
-  (add-to-list 'mu4e-headers-actions
-    '("org-contact-add" . mu4e-action-add-org-contact) t)
-  (add-to-list 'mu4e-view-actions
-    '("org-contact-add" . mu4e-action-add-org-contact) t)
-#+END_SRC emacs-lisp
 **** Helm
 #+BEGIN_SRC emacs-lisp
   (use-package helm
