@@ -25,6 +25,7 @@
         - [[#org-caldav][Org Caldav]]
       - [[#company][Company]]
       - [[#deft][Deft]]
+      - [[#perspective-mode][Perspective Mode]]
     - [[#languages][Languages]]
       - [[#docker][Docker]]
       - [[#shell][Shell]]
@@ -979,18 +980,21 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 (use-package company
   :ensure t
   :diminish company-mode
-  :demand
-  :init
-  (setq company-idle-delay nil)
-  :config
-  (global-company-mode))
+  :defer 0.5
+  :delight
+  :custom
+  (company-begin-commands '(self-insert-command))
+  (company-idle-delay .1)
+  (company-minimum-prefix-length 2)
+  (company-show-numbers t)
+  (company-tooltip-align-annotations 't)
+  (global-company-mode t))
 
 (use-package company-quickhelp
   :ensure t
   :after (company)
   :config
   (company-quickhelp-mode))
-
 #+END_SRC
 **** Deft
 I need a better way to search through my org notes.  If I can find it with this, a ripgrep will usually get the job done.
@@ -1005,7 +1009,14 @@ I need a better way to search through my org notes.  If I can find it with this,
   (setq deft-recursive t)
   (setq deft-use-filename-as-title t))
 #+END_SRC
-
+**** Perspective Mode
+I wish I had a way to remember my layout and open buffers...O wait! This is the way
+#+BEGIN_SRC emacs-lisp
+(use-package perspective
+  :ensure t
+  :config
+  (persp-mode))
+#+END_SRC
 *** Languages
 **** Docker
 #+BEGIN_SRC emacs-lisp
@@ -1022,10 +1033,12 @@ I need a better way to search through my org notes.  If I can find it with this,
 (use-package flymake-shellcheck
   :commands flymake-shellcheck-load
   :init
-  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))(use-package flymake-shellcheck
-  :commands flymake-shellcheck-load
-  :init
   (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
+
+;;This makes your shell script executable after you save
+(use-package sh-script
+  :ensure nil
+  :hook (after-save . executable-make-buffer-file-executable-if-script-p))
 #+END_SRC
 **** Golang
 #+BEGIN_SRC emacs-lisp
@@ -1050,6 +1063,8 @@ Lsp allows us to utilize the same interface to multiple languages
   :hook 
    (js-mode . lsp)
    (terraform-mode . lsp)
+   (rust-mode . lsp)
+   (python-mode . lsp)
    (sh-mode . lsp))
 
 (use-package lsp-rust
@@ -1147,6 +1162,14 @@ Lsp allows us to utilize the same interface to multiple languages
 (use-package toml-mode
   :defer t
   :config (progn (add-hook 'toml-mode-hook 'prog-minor-modes-common)))
+
+;;Lets use the new lsp
+(setq lsp-rust-server 'rust-analyzer)
+;;Various quality of life settings for rust
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+(add-hook 'rust-mode-hook 'lsp)
+(add-hook 'rust-mode-hook 'company-mode)
+(add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
 #+END_SRC
 **** Terraform
 #+Begin_SRC emacs-lisp
