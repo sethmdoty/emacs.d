@@ -880,11 +880,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
   :custom
   (org-capture-templates
-   `(("B" "Book" checkitem (file+headline "~/Documents/org/books.org" "Books")
-      "- [ ] %^{Book}"
-      :immediate-finish t)
-     
-     ("l" "Links" entry (file+headline "~/Documents/org/links.org" "Links"),
+    `(("l" "Links" entry (file+headline "~/Documents/org/links.org" "Links"),
       my/org-web-bookmark-template
       :empty-lines 1)
 
