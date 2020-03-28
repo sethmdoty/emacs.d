@@ -835,7 +835,7 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
 #+END_SRC
 ***** Org Capture Templates
 (t) allows me to capture general tasks.  It has some basic link features to show the source
-(l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard
+(l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard.  It will prompt for a tag value too.  I'd like at least one by default to ensure that I can search easier later
 (p) allows me to add projects
 (j) creates a journal entry
 (c) is a contact entry
@@ -872,7 +872,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 :END:
 Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
- (defvar my/org-web-bookmark-template "* %(org-cliplink-capture) 
+ (defvar my/org-web-bookmark-template "* %(org-cliplink-capture) :%^{Tag}:
 :PROPERTIES:
 :BOOKMARK:
 :CREATED %U
