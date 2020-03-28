@@ -874,7 +874,6 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
  (defvar my/org-web-bookmark-template "* %(org-cliplink-capture) 
 :PROPERTIES:
-:TAGS:
 :BOOKMARK:
 :CREATED %U
 :END:")
