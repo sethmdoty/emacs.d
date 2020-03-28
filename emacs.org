@@ -22,6 +22,7 @@
         - [[#org-templates-config][Org Templates Config]]
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
+        - [[#org-superstar][Org Superstar]]
         - [[#org-caldav][Org Caldav]]
       - [[#company][Company]]
       - [[#deft][Deft]]
@@ -923,6 +924,14 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
   :ensure nil
   :after org
   :custom (org-contacts-files '("~/Documents/org/contacts.org")))
+#+END_SRC
+***** Org Superstar
+Its like org-bullets, but better
+#+BEGIN_SRC emacs-lisp
+(use-package org-superstar
+  :ensure t
+  :init
+    (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))) 
 #+END_SRC
 ***** Org Caldav
 #+BEGIN_SRC emacs-lisp
