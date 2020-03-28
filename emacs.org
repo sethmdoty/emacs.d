@@ -19,7 +19,7 @@
       - [[#org][Org]]
         - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
-        - [[#org-templates-config][Org Templates Config]]
+        - [[#org-capture-templates][Org Capture Templates]]
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
         - [[#org-superstar][Org Superstar]]
@@ -751,6 +751,8 @@ ad-do-it))
     (setq org-edit-src-content-indentation 0)
     (setq org-startup-indented t)
     (setq org-fontify-whole-heading-line t)
+    (setq org-pretty-entities t)
+    (setq org-hide-leading-stars t)
     (setq org-agenda-files (list "~/Documents/org"))
     :bind
     (("C-c l" . 'org-store-link)
@@ -831,12 +833,13 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
   :ensure t
   :bind ("C-x p i" . org-cliplink))
 #+END_SRC
-***** Org Templates Config
-(t) allows me to copture emails from mu4e.  It links to the actual email when it makes a task
-(l) copies the contents of my clipboard and paste it as a new entry
+***** Org Capture Templates
+(t) allows me to capture general tasks.  It has some basic link features to show the source
+(l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard
 (p) allows me to add projects
 (j) creates a journal entry
 (c) is a contact entry
+(f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
 #+BEGIN_SRC emacs-lisp
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -867,7 +870,13 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   (defvar my/org-project-template "* TODO [#A] %^{Task}
 :PROPERTIES:
 :END:
-Captured %<%Y-%m-%d %H:%M>" "Template for project task.") 
+Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
+
+ (defvar my/org-web-bookmark-template "* %(org-cliplink-capture) 
+:BOOKMARK:
+:PROPERTIES:
+:CREATED %U
+:END:")
 
   :custom
   (org-capture-templates
@@ -875,10 +884,11 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       "- [ ] %^{Book}"
       :immediate-finish t)
      
-     ("l" "links" entry (file+headline "~/Documents/org/links.org" "Links")
-       "* %? |- (%:description) :BOOKMARK:\n:PROPERTIES:\n:CREATED: %U\n:Source: %:link\n:END:\n%i\n")
+     ("l" "Links" entry (file+headline "~/Documents/org/links.org" "Links"),
+      my/org-web-bookmark-template
+      :empty-lines 1)
 
-     ("c" "Contact" entry (file+headline "~/Documents/org/contacts.org" "Friends"),
+     ("c" "Contact" entry (file+headline "~/Documents/org/contacts.org" "Contacts"),
       my/org-contacts-template
       :empty-lines 1)
      
@@ -888,6 +898,9 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
      ("j" "Journal entry" entry (function org-journal-find-location)
        "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+
+     ("f" "File email (mu4e)" entry (file+headline "~/Documents/org/todo.org" "Email")
+                   "* %a by [[mailto:%:fromaddress][%:fromname]]\n%U\n\n%i%?\n")
 
      ("t" "Task" entry (file+headline "~/Documents/org/todo.org" "Tasks"),
       my/org-basic-task-template
