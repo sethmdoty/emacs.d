@@ -13,6 +13,7 @@
   - [[#ediff][Ediff]]
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
+      - [[#terminal][Terminal]]
       - [[#flycheck][FlyCheck]]
       - [[#mu4e][MU4E]]
         - [[#mu4e-encryption][MU4E Encryption]]
@@ -49,7 +50,6 @@
 
 ** Package Management
 *** Sources
-
 First we're going to add [[melpa.org][melpa]] as a source for packages
 
 #+BEGIN_SRC emacs-lisp
@@ -64,10 +64,10 @@ First we're going to add [[melpa.org][melpa]] as a source for packages
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
-(set-frame-font "Fira Code Retina 12" nil t)
  #+END_SRC
 
 *** Fonts
+
 Mono Fonts are great for development, but we need something pretty for general writing.  
 #+BEGIN_SRC emacs-lisp
 (set-face-attribute 'default nil :font "JetBrains Mono Medium")
@@ -250,7 +250,7 @@ Set titlebar style
   (setq mac-option-modifier nil))
 
 #+END_SRC
-*** VsCode Icons
+*** Icons
 #+BEGIN_SRC emacs-lisp
 (use-package vscode-icon
   :ensure t
@@ -411,6 +411,16 @@ We don't want that annoying floating frame that ediff uses by default.
   :hook (restclient-mode . (lambda ()
                              (add-to-list 'company-backends 'company-restclient))))
 
+(use-package olivetti
+  :ensure t
+  :init
+  (setq olivetti-body-width 80))
+
+#+END_SRC
+
+**** Terminal
+There are other terminals available, but vterm seems more responsive and more native of a choice
+#+BEGIN_SRC emacs-lisp
 (use-package vterm
   :ensure t
   :init
@@ -438,12 +448,6 @@ We don't want that annoying floating frame that ediff uses by default.
    '(shell-pop-shell-type (quote ("vterm" "*vterm*" (lambda nil (vterm)))))
    '(shell-pop-term-shell "/usr/local/bin/zsh")
    '(shell-pop-window-position "bottom")))
-
-(use-package olivetti
-  :ensure t
-  :init
-  (setq olivetti-body-width 80))
-
 #+END_SRC
 
 **** FlyCheck
