@@ -6,12 +6,14 @@
 - [[#configuration][Configuration]]
   - [[#package-management][Package Management]]
     - [[#sources][Sources]]
+    - [[#fonts][Fonts]]
     - [[#use-package][Use-Package]]
   - [[#editor-configuration][Editor Configuration]]
   - [[#buffer-colorize][Buffer Colorize]]
   - [[#ediff][Ediff]]
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
+      - [[#flycheck][FlyCheck]]
       - [[#mu4e][MU4E]]
         - [[#mu4e-encryption][MU4E Encryption]]
       - [[#helm][Helm]]
@@ -64,6 +66,13 @@ First we're going to add [[melpa.org][melpa]] as a source for packages
 (package-initialize)
 (set-frame-font "Fira Code Retina 12" nil t)
  #+END_SRC
+
+*** Fonts
+Mono Fonts are great for development, but we need something pretty for general writing.  
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'default nil :font "JetBrains Mono Medium")
+(set-fontset-font t 'latin "Noto Sans")
+#+END_SRC
 
 
 *** Use-Package
@@ -342,15 +351,6 @@ We don't want that annoying floating frame that ediff uses by default.
                                        (interactive)
                                        (save-some-buffers t))))
 
-(use-package flycheck
-  :ensure t
-  :defer 1
-  :diminish (flycheck-mode . "Fly")
-  :config
-  (add-to-list 'flycheck-checkers 'lsp-ui)
-  :hook
-  (after-init . global-flycheck-mode))
-
 (use-package adaptive-wrap
   :ensure t)
 
@@ -380,7 +380,7 @@ We don't want that annoying floating frame that ediff uses by default.
   (require 'smartparens-config)
   :config
   (sp-use-smartparens-bindings)
-  :hook (prog-mode . smartparens-mode))
+  (smartparens-global-mode 1))
 
 (use-package projectile
   :ensure t
@@ -444,6 +444,18 @@ We don't want that annoying floating frame that ediff uses by default.
   :init
   (setq olivetti-body-width 80))
 
+#+END_SRC
+
+**** FlyCheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :defer 1
+  :diminish (flycheck-mode . "Fly")
+  :config
+  (add-to-list 'flycheck-checkers 'lsp-ui)
+  :hook
+  (after-init . global-flycheck-mode))
 #+END_SRC
 
 **** MU4E
