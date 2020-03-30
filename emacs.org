@@ -416,6 +416,10 @@ We don't want that annoying floating frame that ediff uses by default.
   :init
   (setq olivetti-body-width 80))
 
+;;If yousing emacs-mac by Yamamoto this will allow ligatures
+(if (fboundp 'mac-auto-operator-composition-mode)
+    (mac-auto-operator-composition-mode))
+
 #+END_SRC
 
 **** Terminal
