@@ -13,6 +13,7 @@
   - [[#ediff][Ediff]]
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
+      - [[#ssh-agency][ssh-agency]]
       - [[#terminal][Terminal]]
       - [[#flycheck][FlyCheck]]
       - [[#mu4e][MU4E]]
@@ -45,6 +46,7 @@
       - [[#lua][Lua]]
       - [[#yaml][YAML]]
   - [[#review-and-remove][Review and remove]]
+      - [[#ledger-mode][Ledger mode]]
 
 * Configuration
 
@@ -369,6 +371,7 @@ We don't want that annoying floating frame that ediff uses by default.
   :if (memq window-system '(mac ns x))
   :ensure t
   :config
+  (setq exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-initialize))
 
 (use-package visual-regexp
@@ -420,6 +423,13 @@ We don't want that annoying floating frame that ediff uses by default.
 (if (fboundp 'mac-auto-operator-composition-mode)
     (mac-auto-operator-composition-mode))
 
+#+END_SRC
+
+**** ssh-agency
+with oh-my-zsh, I sometimes get weird issues with the ssh agent and magit.  this ensures that an agent is started in the emacs context
+#+BEGIN_SRC emacs-lisp
+(use-package ssh-agency
+  :ensure t)
 #+END_SRC
 
 **** Terminal
@@ -1316,7 +1326,45 @@ Lsp allows us to utilize the same interface to multiple languages
 **** YAML
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode
-  :ensure t)
+  :ensure t
+  :mode 
+    ("\\.yaml\\'" . yaml-mode)
+    ("\\.yml\\'" . yaml-mode))
 #+END_SRC
 
 ** Review and remove
+**** Ledger mode
+ I'm experimenting with ledger financial system
+ #+BEGIN_SRC emacs-lisp
+(use-package ledger-mode
+  :ensure t
+  :mode ("\\.dat\\'"
+         "\\.ledger\\'")
+  :bind (:map ledger-mode-map
+              ("C-x C-s" . my/ledger-save))
+  :hook (ledger-mode . ledger-flymake-enable)
+  :preface
+  (defun my/ledger-save ()
+    "Automatically clean the ledger buffer at each save."
+    (interactive)
+    (ledger-mode-clean-buffer)
+    (save-buffer))
+  :custom
+  (ledger-clear-whole-transactions t)
+  (ledger-reconcile-default-commodity "USD")
+  (ledger-reports
+   '(("account statement" "%(binary) reg --real [[ledger-mode-flags]] -f %(ledger-file) ^%(account)")
+     ("balance sheet" "%(binary) --real [[ledger-mode-flags]] -f %(ledger-file) bal ^assets ^liabilities ^equity")
+     ("budget" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:budget")
+     ("budget goals" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget goals'")
+     ("budget obligations" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget obligations'")
+     ("budget debts" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget debts'")
+     ("cleared" "%(binary) cleared [[ledger-mode-flags]] -f %(ledger-file)")
+     ("equity" "%(binary) --real [[ledger-mode-flags]] -f %(ledger-file) equity")
+     ("income statement" "%(binary) --invert --real -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^income ^expenses -p \"this month\""))
+   (ledger-report-use-header-line nil)))
+
+(use-package flycheck-ledger
+  :ensure t 
+  :after ledger-mode)
+ #+END_SRC
