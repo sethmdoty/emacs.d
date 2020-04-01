@@ -22,7 +22,9 @@
       - [[#org][Org]]
         - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
+        - [[#org-download][Org-Download]]
         - [[#org-capture-templates][Org Capture Templates]]
+        - [[#org-roam][Org Roam]]
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
         - [[#org-superstar][Org Superstar]]
@@ -857,6 +859,17 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
   :ensure t
   :bind ("C-x p i" . org-cliplink))
 #+END_SRC
+***** Org-Download
+https://github.com/abo-abo/org-download Lets me drap and capture images into my org files
+#+BEGIN_SRC emacs-lisp
+(use-package org-download
+  :ensure t
+  :after org
+  :bind
+  (:map org-mode-map
+        (("s-Y" . org-download-screenshot)
+         ("s-y" . org-download-yank))))
+#+END_SRC
 ***** Org Capture Templates
 (t) allows me to capture general tasks.  It has some basic link features to show the source
 (l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard.  It will prompt for a tag value too.  I'd like at least one by default to ensure that I can search easier later
@@ -883,7 +896,7 @@ org-cliplink lets you insert a link from your clipboard with a title fetched fro
 :END:
 Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 
-  (defvar my/org-contacts-template "* %(org-contacts-template-name)
+   (defvar my/org-contacts-template "* %(org-contacts-template-name)
 :PROPERTIES:
 :ADDRESS: %^{111 Street Street. Omaha,NE, USA}
 :BIRTHDAY: %^{yyyy-mm-dd}
@@ -925,6 +938,33 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
      ("t" "Task" entry (file+headline "~/Documents/org/todo.org" "Tasks"),
       my/org-basic-task-template
       :empty-lines 1))))
+#+END_SRC
+***** Org Roam
+#+BEGIN_SRC emacs-lisp
+(use-package org-roam
+      :ensure t
+      :hook (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "~/Documents/org/")
+      (org-roam-completion-system 'helm)
+      (org-roam-capture-templates
+      '(("d" "default" plain (function org-roam--capture-get-point)
+     "\n-tags::\n%?"
+     :file-name "%<%Y%m%d%H%M%S>-${slug}"
+     :head "#+TITLE: ${title}"
+     :unnarrowed t)))
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n c" . org-roam-capture)
+               ("C-c n g" . org-roam-show-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))))
+
+(use-package company-org-roam
+      :ensure t
+      :config
+      (push 'company-org-roam company-backends))
 #+END_SRC
 ***** Org Journal
 #+BEGIN_SRC emacs-lisp
