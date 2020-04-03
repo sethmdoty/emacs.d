@@ -13,6 +13,12 @@
   - [[#ediff][Ediff]]
   - [[#package-configuration][Package Configuration]]
     - [[#general][General]]
+      - [[#ace-window-manager][Ace Window Manager]]
+      - [[#yasnippet][Yasnippet]]
+      - [[#olivetti][Olivetti]]
+      - [[#smartparens][SmartParens]]
+      - [[#dired][Dired]]
+      - [[#projectile][Projectile]]
       - [[#terminal][Terminal]]
       - [[#flycheck][FlyCheck]]
       - [[#mu4e][MU4E]]
@@ -300,12 +306,114 @@ We don't want that annoying floating frame that ediff uses by default.
   :bind(("C-z" . undo-tree-undo)
         ("C-M-z" . undo-tree-redo)))
 
-(use-package dired-subtree
-  :ensure t)
-
 (use-package hydra
   :ensure t)
 
+(use-package ibuffer
+  :bind( "C-x C-b" . ibuffer))
+
+(use-package ibuffer-sidebar
+  :after (ibuffer)
+  :ensure t)
+
+(use-package smex
+  :ensure t)
+
+(use-package dedicated
+  :ensure t)
+
+
+(use-package switch-buffer-functions
+  :ensure t
+  :init
+  (add-hook 'switch-buffer-functions (lambda (prev cur)
+                                       (interactive)
+                                       (save-some-buffers t))))
+
+(use-package adaptive-wrap
+  :ensure t)
+
+(use-package exec-path-from-shell
+  :if (memq window-system '(mac ns x))
+  :ensure t
+  :config
+  (setq exec-path-from-shell-check-startup-files nil)
+  (exec-path-from-shell-initialize))
+
+(use-package visual-regexp
+  :ensure t)
+
+(use-package diminish
+  :ensure t
+  :config
+  (diminish 'auto-revert-mode))
+
+(use-package restclient
+  :ensure t
+  :mode ("\\.rest\\'" . restclient-mode))
+
+(use-package company-restclient
+  :ensure t
+  :hook (restclient-mode . (lambda ()
+                             (add-to-list 'company-backends 'company-restclient))))
+
+;;If your using emacs-mac by Yamamoto this will allow ligatures
+(if (fboundp 'mac-auto-operator-composition-mode)
+    (mac-auto-operator-composition-mode))
+
+#+END_SRC
+
+**** Ace Window Manager
+This makes moving around multiple windows a lot easier
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :ensure t
+  :bind([remap other-window] . ace-window)
+  :init
+  (setq aw-dispatch-always t)
+  :config
+  (custom-set-faces
+   '(aw-leading-char-face
+     ((t (:inherit ace-jump-face-foreground :height 3.0))))))
+#+END_SRC
+
+**** Yasnippet
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :diminish yas-minor-mode
+  :hook
+  (prog-mode . yas-minor-mode)
+  :config
+  (yas-reload-all))
+
+(use-package yasnippet-snippets
+  :ensure t)
+#+END_SRC
+
+**** Olivetti
+A minor mode for a nice writing environment.  This helps improve general word procesning type features
+#+BEGIN_SRC emacs-lisp
+(use-package olivetti
+  :ensure t
+  :init
+  (setq olivetti-body-width 80))
+#+END_SRC
+
+**** SmartParens
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :ensure t
+  :init
+  (require 'smartparens-config)
+  :config
+  (sp-use-smartparens-bindings)
+  (smartparens-global-mode 1))
+#+END_SRC
+
+**** Dired
+These extend the emacs file features a bit to give me a nice sidebar and view when browsing files
+#+BEGIN_SRC emacs-lisp
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
   :ensure t
@@ -324,69 +432,12 @@ We don't want that annoying floating frame that ediff uses by default.
   (setq dired-sidebar-use-term-integration t)
   (setq dired-sidebar-use-custom-font t))
 
-(use-package ibuffer
-  :bind( "C-x C-b" . ibuffer))
-
-(use-package ibuffer-sidebar
-  :after (ibuffer)
+(use-package dired-subtree
   :ensure t)
+#+END_SRC
 
-(use-package smex
-  :ensure t)
-
-(use-package dedicated
-  :ensure t)
-
-(use-package ace-window
-  :ensure t
-  :bind([remap other-window] . ace-window)
-  :init
-  (setq aw-dispatch-always t)
-  :config
-  (custom-set-faces
-   '(aw-leading-char-face
-     ((t (:inherit ace-jump-face-foreground :height 3.0))))))
-
-
-(use-package switch-buffer-functions
-  :ensure t
-  :init
-  (add-hook 'switch-buffer-functions (lambda (prev cur)
-                                       (interactive)
-                                       (save-some-buffers t))))
-
-(use-package adaptive-wrap
-  :ensure t)
-
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :hook
-  (prog-mode . yas-minor-mode)
-  :config
-  (yas-reload-all))
-
-(use-package yasnippet-snippets
-  :ensure t)
-
-(use-package exec-path-from-shell
-  :if (memq window-system '(mac ns x))
-  :ensure t
-  :config
-  (setq exec-path-from-shell-check-startup-files nil)
-  (exec-path-from-shell-initialize))
-
-(use-package visual-regexp
-  :ensure t)
-
-(use-package smartparens
-  :ensure t
-  :init
-  (require 'smartparens-config)
-  :config
-  (sp-use-smartparens-bindings)
-  (smartparens-global-mode 1))
-
+**** Projectile
+#+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure t
   :demand
@@ -400,31 +451,6 @@ We don't want that annoying floating frame that ediff uses by default.
                   (projectile-project-name))))
   :config
   (projectile-mode))
-
-(use-package diminish
-  :ensure t
-  :config
-  (diminish 'auto-revert-mode))
-
-
-(use-package restclient
-  :ensure t
-  :mode ("\\.rest\\'" . restclient-mode))
-
-(use-package company-restclient
-  :ensure t
-  :hook (restclient-mode . (lambda ()
-                             (add-to-list 'company-backends 'company-restclient))))
-
-(use-package olivetti
-  :ensure t
-  :init
-  (setq olivetti-body-width 80))
-
-;;If yousing emacs-mac by Yamamoto this will allow ligatures
-(if (fboundp 'mac-auto-operator-composition-mode)
-    (mac-auto-operator-composition-mode))
-
 #+END_SRC
 
 **** Terminal
