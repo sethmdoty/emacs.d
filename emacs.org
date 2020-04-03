@@ -791,81 +791,86 @@ ad-do-it))
 
 **** Org
 #+BEGIN_SRC emacs-lisp
-  (use-package org
-    :ensure org-plus-contrib
-    :pin org
-    :init
-    (setq org-src-fontify-natively t)
-    (setq org-src-tab-acts-natively t)
-    (setq org-confirm-babel-evaluate nil)
-    (setq org-src-window-setup 'current-window)
-    (setq org-startup-folded nil)
-    (setq org-edit-src-content-indentation 0)
-    (setq org-startup-indented t)
-    (setq org-fontify-whole-heading-line t)
-    (setq org-pretty-entities t)
-    (setq org-hide-leading-stars t)
-    (setq org-agenda-files (list "~/Documents/org"))
-    :bind
-    (("C-c l" . 'org-store-link)
-     ("C-c a" . 'org-agenda)
-     ("C-c c" . 'org-capture))
-    :config
-    (setq org-directory "~/Documents/org/")
-     ;; Split up the search string on whitespace
-    (setq org-agenda-search-view-always-boolean t)
-    ;;Do not make last capture bookmarks.  I do not like them
-    (setq org-capture-bookmark nil)
-    ;;Set Keywords
-      (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-          (sequence "WAITING(w)" "|" "CANCELLED(c)")))
-    ;; Log when task complete
-    (setq org-log-done t)
-    ;; Behaviour for capturing notes using make-capture-frame
-    (defadvice org-capture-finalize
-      (after delete-capture-frame activate)
-    "Advise capture-finalize to close the frame"
-    (if (equal "capture" (frame-parameter nil 'name))
-        (delete-frame)))
+ (use-package org
+   :ensure org-plus-contrib
+   :pin org
+   :init
+   (setq org-src-fontify-natively t)
+   (setq org-src-tab-acts-natively t)
+   (setq org-confirm-babel-evaluate nil)
+   (setq org-src-window-setup 'current-window)
+   (setq org-startup-folded nil)
+   (setq org-edit-src-content-indentation 0)
+   (setq org-startup-indented t)
+   (setq org-fontify-whole-heading-line t)
+   (setq org-pretty-entities t)
+   (setq org-hide-leading-stars t)
+   (setq org-agenda-files (apply 'append
+			      (mapcar
+			       (lambda (directory)
+				 (directory-files-recursively
+				  directory org-agenda-file-regexp))
+			       '("~/Documents/org"))))
+   :bind
+   (("C-c l" . 'org-store-link)
+    ("C-c a" . 'org-agenda)
+    ("C-c c" . 'org-capture))
+   :config
+   (setq org-directory "~/Documents/org/org_files/")
+    ;; Split up the search string on whitespace
+   (setq org-agenda-search-view-always-boolean t)
+   ;;Do not make last capture bookmarks.  I do not like them
+   (setq org-capture-bookmark nil)
+   ;;Set Keywords
+     (setq org-todo-keywords
+       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+         (sequence "WAITING(w)" "|" "CANCELLED(c)")))
+   ;; Log when task complete
+   (setq org-log-done t)
+   ;; Behaviour for capturing notes using make-capture-frame
+   (defadvice org-capture-finalize
+     (after delete-capture-frame activate)
+   "Advise capture-finalize to close the frame"
+   (if (equal "capture" (frame-parameter nil 'name))
+       (delete-frame)))
 
-  (defadvice org-capture-destroy
-      (after delete-capture-frame activate)
-    "Advise capture-destroy to close the frame"
-    (if (equal "capture" (frame-parameter nil 'name))
-        (delete-frame)))
+ (defadvice org-capture-destroy
+     (after delete-capture-frame activate)
+   "Advise capture-destroy to close the frame"
+   (if (equal "capture" (frame-parameter nil 'name))
+       (delete-frame)))
 
-  (defadvice org-switch-to-buffer-other-window
-      (after supress-window-splitting activate)
-    "Delete the extra window if we're in a capture frame"
-    (if (equal "capture" (frame-parameter nil 'name))
-        (delete-other-windows)))
-    ;;What languages do we care to do
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((restclient . t)
-       (browser . t)
-       (shell . t)
-       (scheme . t)
-       (gnuplot . t)
-       (plantuml . t)
-       (js . t))))
+ (defadvice org-switch-to-buffer-other-window
+     (after supress-window-splitting activate)
+   "Delete the extra window if we're in a capture frame"
+   (if (equal "capture" (frame-parameter nil 'name))
+       (delete-other-windows)))
+   ;;What languages do we care to do
+   (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((restclient . t)
+      (browser . t)
+      (shell . t)
+      (scheme . t)
+      (gnuplot . t)
+      (plantuml . t)
+      (js . t))))
 
-    (use-package org-protocol)
-    
-    (use-package ob-restclient
-      :ensure t)
+   (use-package org-protocol)
 
-    (use-package ob-browser
-      :ensure t)
-    
-    (use-package org-super-agenda
-      :ensure t)
-    
-    (use-package toc-org
-      :ensure t
-      :after org
-      :hook (org-mode . toc-org-enable))
+   (use-package ob-restclient
+     :ensure t)
+
+   (use-package ob-browser
+     :ensure t)
+
+   (use-package org-super-agenda
+     :ensure t)
+
+   (use-package toc-org
+     :ensure t
+     :after org
+     :hook (org-mode . toc-org-enable))
 #+END_SRC
 ***** Org Crypt
 This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
@@ -925,8 +930,8 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 
    (defvar my/org-contacts-template "* %(org-contacts-template-name)
 :PROPERTIES:
-:ADDRESS: %^{111 Street Street. Omaha,NE, USA}
-:BIRTHDAY: %^{yyyy-mm-dd}
+:ADDRESS: %{111 Street Street. Omaha,NE, USA}
+:BIRTHDAY: %{yyyy-mm-dd}
 :EMAIL: %(org-contacts-template-email)
 :NOTE: %^{NOTE}
 :END:" "Template for org-contacts.")
@@ -943,11 +948,11 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 :END:")
 
   (defun my/create-zet-file ()
-    "Create an org file in ~/Documents/org/."
+    "Create an org file in ~/Documents/org/roam"
     (interactive)
     (let ((name (read-string "Filename: ")))
       (expand-file-name (format "%s-%s.org"(format-time-string "%Y%m%d%H%M%S")
-                                  name) "~/Documents/org/")))
+                                  name) "~/Documents/org/roam/")))
 
   :custom
   (org-capture-templates
@@ -955,21 +960,21 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       my/org-web-bookmark-template
       :empty-lines 1)
 
-     ("c" "Contact" entry (file+headline "~/Documents/org/contacts.org" "Contacts"),
+     ("c" "Contact" entry (file+headline "~/Documents/org/contacts/contacts.org" "Contacts"),
       my/org-contacts-template
       :empty-lines 1)
      
-     ("p" "Project Entry" entry (file "~/Documents/org/projects.org"),
+     ("p" "Project Entry" entry (file "~/Documents/org/org_files/projects.org"),
       my/org-project-template
       :empty-lines 1)
 
      ("j" "Journal entry" entry (function org-journal-find-location)
        "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
 
-     ("f" "File email (mu4e)" entry (file+headline "~/Documents/org/todo.org" "Email")
+     ("f" "File email (mu4e)" entry (file+headline "~/Documents/org/org_files/todo.org" "Email")
                    "* %a by [[mailto:%:fromaddress][%:fromname]]\n%U\n\n%i%?\n")
 
-     ("t" "Task" entry (file+headline "~/Documents/org/todo.org" "Tasks"),
+     ("t" "Task" entry (file+headline "~/Documents/org/org_files/todo.org" "Tasks"),
       my/org-basic-task-template
       :empty-lines 1))))
 #+END_SRC
@@ -979,7 +984,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       :ensure t
       :hook (after-init . org-roam-mode)
       :custom
-      (org-roam-directory "~/Documents/org/")
+      (org-roam-directory "~/Documents/org/roam/")
       (org-journal-enable-agenda-integration t)
       (org-roam-completion-system 'helm)
       (org-roam-capture-templates
@@ -1031,7 +1036,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 (use-package org-contacts
   :ensure nil
   :after org
-  :custom (org-contacts-files '("~/Documents/org/contacts.org")))
+  :custom (org-contacts-files '("~/Documents/org/contacts/contacts.org")))
 #+END_SRC
 ***** Org Superstar
 Its like org-bullets, but better
