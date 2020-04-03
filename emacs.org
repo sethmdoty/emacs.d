@@ -916,9 +916,16 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 :CREATED %U
 :END:")
 
+  (defun my/create-zet-file ()
+    "Create an org file in ~/Documents/org/."
+    (interactive)
+    (let ((name (read-string "Filename: ")))
+      (expand-file-name (format "%s-%s.org"(format-time-string "%Y%m%d%H%M%S")
+                                  name) "~/Documents/org/")))
+
   :custom
   (org-capture-templates
-    `(("l" "Links" entry (file+headline "~/Documents/org/links.org" "Links"),
+    `(("l" "Links" entry (file my/create-zet-file),
       my/org-web-bookmark-template
       :empty-lines 1)
 
