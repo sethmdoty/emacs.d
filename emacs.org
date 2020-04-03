@@ -31,6 +31,7 @@
         - [[#org-caldav][Org Caldav]]
       - [[#company][Company]]
       - [[#deft][Deft]]
+      - [[#pdf-tools][PDF Tools]]
       - [[#perspective-mode][Perspective Mode]]
     - [[#languages][Languages]]
       - [[#docker][Docker]]
@@ -946,6 +947,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       :hook (after-init . org-roam-mode)
       :custom
       (org-roam-directory "~/Documents/org/")
+      (org-journal-enable-agenda-integration t)
       (org-roam-completion-system 'helm)
       (org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
@@ -1090,6 +1092,28 @@ I need a better way to search through my org notes.  If I can find it with this,
   (setq deft-directory "~/Documents/org")
   (setq deft-recursive t)
   (setq deft-use-filename-as-title t))
+#+END_SRC
+**** PDF Tools
+PDF Tools is, among other things, a replacement of DocView for PDF files. The key difference is that pages are not pre-rendered by e.g. ghostscript and stored in the file-system, but rather created on-demand and stored in memory.
+#+BEGIN_SRC emacs-lisp
+(use-package pdf-tools
+  :ensure t
+  :defer 1
+  :magic ("%PDF" . pdf-view-mode)
+  :init (pdf-tools-install :no-query))
+
+(use-package pdf-view
+  :ensure nil
+  :after pdf-tools
+  :bind (:map pdf-view-mode-map
+              ("C-s" . isearch-forward)
+              ("d" . pdf-annot-delete)
+              ("h" . pdf-annot-add-highlight-markup-annotation)
+              ("t" . pdf-annot-add-text-annotation))
+  :custom
+  (pdf-view-display-size 'fit-page)
+  (pdf-view-resize-factor 1.1)
+  (pdf-view-use-unicode-ligther nil))
 #+END_SRC
 **** Perspective Mode
 I wish I had a way to remember my layout and open buffers...O wait! This is the way
