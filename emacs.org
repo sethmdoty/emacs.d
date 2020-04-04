@@ -805,12 +805,7 @@ ad-do-it))
    (setq org-fontify-whole-heading-line t)
    (setq org-pretty-entities t)
    (setq org-hide-leading-stars t)
-   (setq org-agenda-files (apply 'append
-			      (mapcar
-			       (lambda (directory)
-				 (directory-files-recursively
-				  directory org-agenda-file-regexp))
-			       '("~/Documents/org"))))
+   (setq org-agenda-files (list "~/Documents/org/org_files/"))
    :bind
    (("C-c l" . 'org-store-link)
     ("C-c a" . 'org-agenda)
@@ -985,7 +980,6 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       :hook (after-init . org-roam-mode)
       :custom
       (org-roam-directory "~/Documents/org/roam/")
-      (org-journal-enable-agenda-integration t)
       (org-roam-completion-system 'helm)
       (org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
@@ -1011,21 +1005,9 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 (use-package org-journal
   :after org
   :ensure t
-  :bind (("C-c T" . org-journal-new-entry)
-         ("C-c Y" . journal-file-yesterday))
-  :preface
-  (defun get-journal-file-yesterday ()
-    "Gets filename for yesterday's journal entry."
-    (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
-           (daily-name (format-time-string "%Y%m%d" yesterday)))
-      (expand-file-name (concat org-journal-dir daily-name))))
-
-  (defun journal-file-yesterday ()
-    "Creates and load a file based on yesterday's date."
-    (interactive)
-    (find-file (get-journal-file-yesterday)))
   :custom
   (org-journal-date-format "%e %b %Y (%A)")
+  (org-journal-enable-agenda-integration t)
   (org-journal-dir (format "~/Documents/org/journal/" (format-time-string "%Y")))
   (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
