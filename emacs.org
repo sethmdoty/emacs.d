@@ -29,16 +29,16 @@
         - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-download][Org-Download]]
+        - [[#org-ref][Org-Ref]]
+        - [[#org-noter][Org-noter]]
         - [[#org-capture-templates][Org Capture Templates]]
         - [[#org-roam][Org Roam]]
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
         - [[#org-superstar][Org Superstar]]
-        - [[#org-caldav][Org Caldav]]
       - [[#company][Company]]
       - [[#deft][Deft]]
       - [[#pdf-tools][PDF Tools]]
-      - [[#perspective-mode][Perspective Mode]]
     - [[#languages][Languages]]
       - [[#docker][Docker]]
       - [[#shell][Shell]]
@@ -60,7 +60,7 @@
 
 ** Package Management
 *** Sources
-First we're going to add [[melpa.org][melpa]] as a source for packages
+First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source for packages
 
 #+BEGIN_SRC emacs-lisp
 (require 'package)
@@ -322,7 +322,6 @@ We don't want that annoying floating frame that ediff uses by default.
 (use-package dedicated
   :ensure t)
 
-
 (use-package switch-buffer-functions
   :ensure t
   :init
@@ -392,7 +391,7 @@ This makes moving around multiple windows a lot easier
 #+END_SRC
 
 **** Olivetti
-A minor mode for a nice writing environment.  This helps improve general word procesning type features
+A minor mode for a nice writing environment.  This helps improve general word processing type features
 #+BEGIN_SRC emacs-lisp
 (use-package olivetti
   :ensure t
@@ -517,7 +516,7 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (setq mu4e-update-interval 300)
   (setq mu4e-use-fancy-chars t)
   (setq mail-user-agent 'mu4e-user-agent)
-  (setq mu4e-org-contacts-file "~/Documents/org/contacts.org")
+  (setq mu4e-org-contacts-file "~/org/contacts/contacts.org")
     :config
   (add-to-list 'mu4e-headers-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
   (add-to-list 'mu4e-view-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
@@ -805,13 +804,13 @@ ad-do-it))
    (setq org-fontify-whole-heading-line t)
    (setq org-pretty-entities t)
    (setq org-hide-leading-stars t)
-   (setq org-agenda-files (list "~/Documents/org/org_files/"))
+   (setq org-agenda-files (list "~/org/org-files/"))
    :bind
    (("C-c l" . 'org-store-link)
     ("C-c a" . 'org-agenda)
     ("C-c c" . 'org-capture))
    :config
-   (setq org-directory "~/Documents/org/org_files/")
+   (setq org-directory "~/org/org-files/")
     ;; Split up the search string on whitespace
    (setq org-agenda-search-view-always-boolean t)
    ;;Do not make last capture bookmarks.  I do not like them
@@ -869,7 +868,7 @@ ad-do-it))
 #+END_SRC
 ***** Org Crypt
 This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
-will be automatically encrypted when saved. Preventing tag inheritance prevevts encrypted text inside encrypted text.  More can be found in the org
+will be automatically encrypted when saved. Preventing tag inheritance prevents encrypted text inside encrypted text.  More can be found in the org
 mode manual here: https://orgmode.org/worg/org-tutorials/encrypting-files.html
 #+BEGIN_SRC emacs-lisp
 (require 'org-crypt)
@@ -896,6 +895,36 @@ https://github.com/abo-abo/org-download Lets me drap and capture images into my 
   (:map org-mode-map
         (("s-Y" . org-download-screenshot)
          ("s-y" . org-download-yank))))
+#+END_SRC
+***** Org-Ref
+Captures bibtext entries in an org file, and can look them up online.
+#+BEGIN_SRC emacs-lisp
+(use-package org-ref
+  :ensure t
+  :after org
+  :init
+  (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
+  (setq org-ref-bibliography-notes "~/org/bibliography/notes.org"
+      org-ref-default-bibliography '("~/org/bibliography/references.bib")
+      org-ref-pdf-directory "~/org/bibliography/bibtex-pdfs/"))
+
+(use-package helm-bibtex
+  :ensure t
+  :init
+   (setq bibtex-completion-bibliography "~/org/bibliography/references.bib"
+      bibtex-completion-library-path "~/org/bibliography/bibtex-pdfs"
+      bibtex-completion-notes-path "~/org/bibliography/helm-bibtex-notes")
+   ;; open pdf with system pdf viewer (works on mac)
+   (setq bibtex-completion-pdf-open-function
+     (lambda (fpath)
+       (start-process "open" "*open*" "open" fpath))))
+#+END_SRC
+***** Org-noter
+Allows me to add notes to documents I can open in emacs.  This is nice because it stores the notes in an org file, not in the document directly like typical annotations
+ https://github.com/weirdNox/org-noter
+#+BEGIN_SRC emacs-lisp
+(use-package org-noter
+  :ensure t)
 #+END_SRC
 ***** Org Capture Templates
 (t) allows me to capture general tasks.  It has some basic link features to show the source
@@ -936,18 +965,18 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 :END:
 Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
- (defvar my/org-web-bookmark-template "* %(org-cliplink-capture) :%^{Tag}:
+ (defvar my/org-web-bookmark-template "* %(org-cliplink-capture)
 :PROPERTIES:
 :BOOKMARK:
 :CREATED %U
 :END:")
 
   (defun my/create-zet-file ()
-    "Create an org file in ~/Documents/org/roam"
+    "Create an org file in ~/org/roam"
     (interactive)
     (let ((name (read-string "Filename: ")))
       (expand-file-name (format "%s-%s.org"(format-time-string "%Y%m%d%H%M%S")
-                                  name) "~/Documents/org/roam/")))
+                                  name) "~/org/roam/")))
 
   :custom
   (org-capture-templates
@@ -955,21 +984,21 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       my/org-web-bookmark-template
       :empty-lines 1)
 
-     ("c" "Contact" entry (file+headline "~/Documents/org/contacts/contacts.org" "Contacts"),
+     ("c" "Contact" entry (file+headline "~/org/contacts/contacts.org" "Contacts"),
       my/org-contacts-template
       :empty-lines 1)
      
-     ("p" "Project Entry" entry (file "~/Documents/org/org_files/projects.org"),
+     ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
       my/org-project-template
       :empty-lines 1)
 
      ("j" "Journal entry" entry (function org-journal-find-location)
        "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
 
-     ("f" "File email (mu4e)" entry (file+headline "~/Documents/org/org_files/todo.org" "Email")
+     ("f" "File email (mu4e)" entry (file+headline "~/org/org-files/todo.org" "Email")
                    "* %a by [[mailto:%:fromaddress][%:fromname]]\n%U\n\n%i%?\n")
 
-     ("t" "Task" entry (file+headline "~/Documents/org/org_files/todo.org" "Tasks"),
+     ("t" "Task" entry (file+headline "~/org/org-files/todo.org" "Tasks"),
       my/org-basic-task-template
       :empty-lines 1))))
 #+END_SRC
@@ -979,7 +1008,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       :ensure t
       :hook (after-init . org-roam-mode)
       :custom
-      (org-roam-directory "~/Documents/org/roam/")
+      (org-roam-directory "~/org/roam/")
       (org-roam-completion-system 'helm)
       (org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
@@ -1008,7 +1037,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
   :custom
   (org-journal-date-format "%e %b %Y (%A)")
   (org-journal-enable-agenda-integration t)
-  (org-journal-dir (format "~/Documents/org/journal/" (format-time-string "%Y")))
+  (org-journal-dir (format "~/org/journal/" (format-time-string "%Y")))
   (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
@@ -1018,7 +1047,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 (use-package org-contacts
   :ensure nil
   :after org
-  :custom (org-contacts-files '("~/Documents/org/contacts/contacts.org")))
+  :custom (org-contacts-files '("~/org/contacts/contacts.org")))
 #+END_SRC
 ***** Org Superstar
 Its like org-bullets, but better
@@ -1028,57 +1057,7 @@ Its like org-bullets, but better
   :init
     (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))) 
 #+END_SRC
-***** Org Caldav
-#+BEGIN_SRC emacs-lisp
-;; Tracking this bug: https://github.com/dengste/org-caldav/issues/189
-;; (use-package org-caldav
-;;   :after org
-;;   :ensure t
-;;   :init
-;;  ;; This is the sync on close function; it also prompts for save after syncing so 
-;;  ;; no late changes get lost 
-;;   (defun org-caldav-sync-at-close ()
-;;    (org-caldav-sync)
-;;    (save-some-buffers))
-  
-;;   ;;This is the delayed sync function; it waits until emacs has been idle for 
-;;   ;;"secs" seconds before syncing.  The delay is important because the caldav-sync
-;;   ;;can take five or ten seconds, which would be painful if it did that right at save.  
-;;   ;;This way it just waits until you've been idle for a while to avoid disturbing 
-;;   ;;the user.
-;;   (defvar org-caldav-sync-timer nil
-;;     "Timer that `org-caldav-push-timer' used to reschedule itself, or nil.")
-;;   (defun org-caldav-sync-with-delay (secs)
-;;    (when org-caldav-sync-timer
-;;      (cancel-timer org-caldav-sync-timer))
-;;    (setq org-caldav-sync-timer
-;; 	 (run-with-idle-timer
-;; 	  (* 1 secs) nil 'org-caldav-sync)))
-  
-;;   ;;Actual calendar configuration edit this to meet your specific needs
-;;   (setq org-caldav-url "https://posteo.de:8443/calendars/sethmdoty/default/")
-;;   (setq org-caldav-calendars
-;;     '((:calendar-id "default"
-;; 	    	:files ("~/Documents/org/posteo-default.org")
-;; 		:inbox "~/Documents/org/org-caldav-inbox.org")))
-;; 	(setq org-caldav-backup-file "~/Documents/org/org-posteo-backup.org")
-;;   (setq org-caldav-save-directory "~/Documents/org/org-caldav/"))
-;;   :config
-;;   (setq org-icalendar-alarm-time 1)
-;;   ;;This makes sure to-do items as a category can show up on the calendar
-;;   (setq org-icalendar-include-todo t)
-;;   ;;This ensures all org "deadlines" show up, and show up as due dates
-;;   (setq org-icalendar-use-deadline '(event-if-todo event-if-not-todo todo-due))
-;;   ;;This ensures "scheduled" org items show up, and show up as start times
-;;   (setq org-icalendar-use-scheduled '(todo-start event-if-todo event-if-not-todo))
-;;   ;;Add the delayed save hook with a five minute idle timer
-;;   (add-hook 'after-save-hook
-;; 	   (lambda ()
-;; 	     (when (eq major-mode 'org-mode)
-;; 		(org-caldav-sync-with-delay 300))))
-;;   ;;Add the close emacs hook
-;;   (add-hook 'kill-emacs-hook 'org-caldav-sync-at-close))
-#+END_SRC
+
 **** Company
 #+BEGIN_SRC emacs-lisp
 (use-package company
@@ -1109,7 +1088,7 @@ I need a better way to search through my org notes.  If I can find it with this,
   :commands (deft)
   :config
   (setq deft-extensions '("txt" "tex" "org"))
-  (setq deft-directory "~/Documents/org")
+  (setq deft-directory "~/org")
   (setq deft-recursive t)
   (setq deft-use-filename-as-title t))
 #+END_SRC
@@ -1134,14 +1113,6 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
   (pdf-view-display-size 'fit-page)
   (pdf-view-resize-factor 1.1)
   (pdf-view-use-unicode-ligther nil))
-#+END_SRC
-**** Perspective Mode
-I wish I had a way to remember my layout and open buffers...O wait! This is the way
-#+BEGIN_SRC emacs-lisp
-(use-package perspective
-  :ensure t
-  :config
-  (persp-mode))
 #+END_SRC
 *** Languages
 **** Docker
@@ -1177,10 +1148,10 @@ I wish I had a way to remember my layout and open buffers...O wait! This is the 
   :ensure t)
 (use-package flymake-go
   :ensure t)
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
 #+END_SRC
 **** LSP Mode
 Lsp allows us to utilize the same interface to multiple languages
-
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :ensure t
