@@ -583,7 +583,9 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (setq mu4e-use-fancy-chars t)
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-org-contacts-file "~/org/contacts/contacts.org")
-    :config
+  ;;This integrates choosing mailboxes with helm
+  (setq mu4e-completing-read-function 'completing-read)
+  :config
   (add-to-list 'mu4e-headers-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
   (add-to-list 'mu4e-view-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
   ;; We could get duplicate UIDs from mbsync if we don't do this
@@ -617,7 +619,6 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (setq mu4e-compose-format-flowed t)
   (add-hook 'mu4e-compose-mode-hook 'visual-clean)  
   ;; Configure sending mail.
-  (setq mu4e-compose-format-flowed t)
   (setq message-send-mail-function 'message-send-mail-with-sendmail
 	sendmail-program "/usr/local/bin/msmtp")
 	
