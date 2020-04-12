@@ -697,25 +697,8 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   :after mu4e
   :config
   (mu4e-alert-set-default-style 'notifier)
-  :init
-  (setq mu4e-alert-interesting-mail-query
-    (concat
-     "flag:unread maildir:/icloud/INBOX"
-     "OR "
-     "flag:unread maildir:/posteo/INBOX"
-     "OR "
-     "flag:unread maildir:/gmail/INBOX"
-     ))
-  (mu4e-alert-enable-mode-line-display)
-  (defun gjstein-refresh-mu4e-alert-mode-line ()
-    (interactive)
-    (mu4e~proc-kill)
-    (mu4e-alert-enable-mode-line-display)
-    )
-
-  ;; display stuff on modeline as well as notify
-  (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
-  (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
+  :hook ((after-init . mu4e-alert-enable-mode-line-display)
+        (after-init . mu4e-alert-enable-notifications)))
 #+END_SRC
 ***** MU4E Encryption
 #+BEGIN_SRC emacs-lisp
