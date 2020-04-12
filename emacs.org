@@ -982,6 +982,7 @@ Allows me to add notes to documents I can open in emacs.  This is nice because i
 (j) creates a journal entry
 (c) is a contact entry
 (f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
+(s) just a quick capture template for scratch stuff I want to keep for longer than my emacs session
 #+BEGIN_SRC emacs-lisp
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -1040,6 +1041,8 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
      ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
       my/org-project-template
       :empty-lines 1)
+
+     ("s" "Scratch File" entry (file "~/org/scratch/scratch.org"))
 
      ("j" "Journal entry" entry (function org-journal-find-location)
        "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
