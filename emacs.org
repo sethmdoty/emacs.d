@@ -1,6 +1,6 @@
-#+TITLE: Emacs Configuration
-#+AUTHOR: Seth Doty
-#+PROPERTY: header-args :tangle yes
+#+title: Emacs Configuration
+#+author: Seth Doty
+#+property: header-args :tangle yes
 
 * Table Of Contents                                                :TOC_5_gh:
 - [[#configuration][Configuration]]
@@ -27,6 +27,8 @@
       - [[#helm][Helm]]
       - [[#git][Git]]
       - [[#org][Org]]
+        - [[#reformatting-an-org-buffer][Reformatting an Org Buffer]]
+        - [[#org-super-agenda][Org-Super-Agenda]]
         - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-download][Org-Download]]
@@ -63,7 +65,7 @@
 *** Sources
 First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source for packages
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (require 'package)
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
@@ -75,33 +77,33 @@ First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source 
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
- #+END_SRC
+#+end_src
 
 *** Fonts
 
 Mono Fonts are great for development, but we need something pretty for general writing.  
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (set-face-attribute 'default nil :font "JetBrains Mono Medium")
 (set-fontset-font t 'latin "Noto Sans")
-#+END_SRC
+#+end_src
 
 
 *** Use-Package
 
 Make sure [[https://github.com/jwiegley/use-package][use-package]] is available, if it's not we install it.
 
- #+BEGIN_SRC emacs-lisp
-   (unless (package-installed-p 'use-package)
-     (package-refresh-contents)
-     (package-install 'use-package))
-   (setq use-package-ensure-all t)
-   (require 'use-package)
- #+END_SRC
+#+begin_src emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(setq use-package-ensure-all t)
+(require 'use-package)
+#+end_src
 
-** Editor Configuration                                         :noexport_1:
+** Editor Configuration                                          :noexport_1:
 *** Themes
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1))
@@ -116,31 +118,31 @@ Make sure [[https://github.com/jwiegley/use-package][use-package]] is available,
   :config
   (solaire-mode-swap-bg)
   (solaire-global-mode +1))
-#+END_SRC
+#+end_src
 
 *** Keep changes from 'customize' in a seperate file
 
- #+BEGIN_SRC emacs-lisp
-   (setq custom-file "~/.emacs.d/.emacs-customize.el")
-   (load custom-file)
- #+END_SRC
+#+begin_src emacs-lisp
+(setq custom-file "~/.emacs.d/.emacs-customize.el")
+(load custom-file)
+#+end_src
 
 *** Save all backups in one place
 
- #+BEGIN_SRC emacs-lisp
-    (setq backup-directory-alist
-          `(("." . ,(concat user-emacs-directory "backups"))))
- #+END_SRC
+#+begin_src emacs-lisp
+(setq backup-directory-alist
+      `(("." . ,(concat user-emacs-directory "backups"))))
+#+end_src
 
 *** Use `y' or `n' everywhere instead of 'yes' or 'no'
 
- #+BEGIN_SRC emacs-lisp
-   (fset 'yes-or-no-p 'y-or-n-p)
- #+END_SRC
+#+begin_src emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
 
 *** Enable shift+arrow keys to change active window
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package windmove
   :ensure nil
   :bind
@@ -148,26 +150,26 @@ Make sure [[https://github.com/jwiegley/use-package][use-package]] is available,
    ("C-M-<right>". windmove-right)
    ("C-M-<up>". windmove-up)
    ("C-M-<down>". windmove-down)))
-#+END_SRC
+#+end_src
 
 *** Enable and configure recentf-mode (recent-files)
 
-#+BEGIN_SRC emacs-lisp
-  (recentf-mode 1)
-  (setq recentf-max-saved-items 200)
-  (setq recentf-max-menu-items 50)
-  (setq recentf-exclude '("^/var/folders\\.*"
-        "COMMIT_EDITMSG\\'"
-        ".*-autoloads\\.el\\'"
-        "[/\\]\\.elpa/"
-        ))
-#+END_SRC
+#+begin_src emacs-lisp
+(recentf-mode 1)
+(setq recentf-max-saved-items 200)
+(setq recentf-max-menu-items 50)
+(setq recentf-exclude '("^/var/folders\\.*"
+      "COMMIT_EDITMSG\\'"
+      ".*-autoloads\\.el\\'"
+      "[/\\]\\.elpa/"
+      ))
+#+end_src
 
 *** Customize titlebar
 Show path to file and, if available, the project name.
 Set titlebar style
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun frame-title-format ()
   "Return frame title with current project name, where applicable."
   (concat
@@ -183,11 +185,11 @@ Set titlebar style
 (setq-default frame-title-format '((:eval (frame-title-format))))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
-#+END_SRC
+#+end_src
 
 *** Various small quality of life changes
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (scroll-bar-mode 0)
 (tool-bar-mode 0)
 (delete-selection-mode 1)
@@ -199,95 +201,93 @@ Set titlebar style
 (global-hl-line-mode 1)
 (eldoc-mode 1)
 (setq max-lisp-eval-depth 10000)
-#+END_SRC
+#+end_src
 
 *** Enable toggle code foldings with C-c @ C-c
 
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'prog-mode-hook (lambda () (interactive)(hs-minor-mode 1)))
-#+END_SRC
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook (lambda () (interactive)(hs-minor-mode 1)))
+#+end_src
 
 *** Enable undo window layout changes with C-c Left and C-c Right
 
-#+BEGIN_SRC emacs-lisp
-  (winner-mode 1)
-#+END_SRC
+#+begin_src emacs-lisp
+(winner-mode 1)
+#+end_src
 
 *** Adjust some editor variables
-#+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-screen t)
-  (setq ring-bell-function 'ignore)
-  (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 2)
-#+END_SRC
+#+begin_src emacs-lisp
+(setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+#+end_src
 
 *** Override a couple of default keybindings
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
 (global-set-key (kbd "C-r") 'isearch-backward-regexp)
 (global-set-key (kbd "C-M-s") 'isearch-forward)
 (global-set-key (kbd "C-M-r") 'isearch-backward)
-
-#+END_SRC
+#+end_src
 
 *** Set file encoding preferences
-#+BEGIN_SRC emacs-lisp
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (setq-default buffer-file-coding-system 'utf-8-unix)
-#+END_SRC
+#+begin_src emacs-lisp
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-unix)
+#+end_src
 
 *** Provide a function to correct line endings
-#+BEGIN_SRC emacs-lisp
-  (defun dos2unix ()
-    "Replace DOS eolns CR LF with Unix eolns CR"
-    (interactive)
-      (goto-char (point-min))
-      (while (search-forward "\r" nil t) (replace-match "")))
-#+END_SRC
+#+begin_src emacs-lisp
+(defun dos2unix ()
+  "Replace DOS eolns CR LF with Unix eolns CR"
+  (interactive)
+    (goto-char (point-min))
+    (while (search-forward "\r" nil t) (replace-match "")))
+#+end_src
 
 *** Add some hooks for saving buffers
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'focus-out-hook (lambda () (interactive)(save-some-buffers t)))
-  ;; save when frame is closed
-  (add-hook 'delete-frame-functions (lambda () (interactive)(save-some-buffers t)))
-#+END_SRC
+#+begin_src emacs-lisp
+(add-hook 'focus-out-hook (lambda () (interactive)(save-some-buffers t)))
+;; save when frame is closed
+(add-hook 'delete-frame-functions (lambda () (interactive)(save-some-buffers t)))
+#+end_src
 
 
 *** Provide custom buffer-cleanup functions
-#+BEGIN_SRC emacs-lisp
-  (defun kill-dired-buffers ()
-    "Kill all dired buffers."
-    (interactive)
-    (mapc (lambda (buffer)
-      (when (eq 'dired-mode (buffer-local-value 'major-mode buffer))
-        (kill-buffer buffer)))
-    (buffer-list)))
-
-   (defun kill-other-buffers ()
-  "Kill all other buffers."
+#+begin_src emacs-lisp
+(defun kill-dired-buffers ()
+  "Kill all dired buffers."
   (interactive)
-  (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
-#+END_SRC
+  (mapc (lambda (buffer)
+    (when (eq 'dired-mode (buffer-local-value 'major-mode buffer))
+      (kill-buffer buffer)))
+  (buffer-list)))
+
+ (defun kill-other-buffers ()
+"Kill all other buffers."
+(interactive)
+(mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+#+end_src
 
 *** Mac-specific key-binding changes
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
   (setq mac-option-modifier nil))
-
-#+END_SRC
+#+end_src
 *** Icons
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package all-the-icons
   :ensure t
   :defer 0.5)
-#+END_SRC
+#+end_src
 
 ** Buffer Colorize
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 ;; load package
 (require 'ansi-color)
 
@@ -300,13 +300,13 @@ Set titlebar style
 
 ;; add hook to apply the function when magit mode is enabled
 (add-hook 'magit-mode-hook 'colorize-buffer)
-#+END_SRC
+#+end_src
 
 ** Speed up Startup
 I’m using an .org file to maintain my GNU Emacs configuration. However, at his launch, it will load the config.el source file for a faster loading.
 
 The code below, executes org-babel-tangle asynchronously when config.org is saved.  Thanks to https://github.com/rememberYou
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package async                                        ;
   :ensure t)
 
@@ -348,18 +348,18 @@ The code below, executes org-babel-tangle asynchronously when config.org is save
                        (float-time (time-subtract (current-time)
                                                   ',init-tangle-start-time)))
             (message "ERROR: %s as tangle failed." ,org-file)))))))
-#+END_SRC
+#+end_src
 
 ** Ediff
 We don't want that annoying floating frame that ediff uses by default.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-#+END_SRC
+#+end_src
 
 ** Package Configuration
 *** General
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package undo-tree
   :ensure t
   :diminish undo-tree-mode
@@ -422,12 +422,11 @@ We don't want that annoying floating frame that ediff uses by default.
 ;;If your using emacs-mac by Yamamoto this will allow ligatures
 (if (fboundp 'mac-auto-operator-composition-mode)
     (mac-auto-operator-composition-mode))
-
-#+END_SRC
+#+end_src
 
 **** Ace Window Manager
 This makes moving around multiple windows a lot easier
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package ace-window
   :ensure t
   :bind([remap other-window] . ace-window)
@@ -437,10 +436,10 @@ This makes moving around multiple windows a lot easier
   (custom-set-faces
    '(aw-leading-char-face
      ((t (:inherit ace-jump-face-foreground :height 3.0))))))
-#+END_SRC
+#+end_src
 
 **** Yasnippet
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package yasnippet
   :ensure t
   :diminish yas-minor-mode
@@ -451,19 +450,19 @@ This makes moving around multiple windows a lot easier
 
 (use-package yasnippet-snippets
   :ensure t)
-#+END_SRC
+#+end_src
 
 **** Olivetti
 A minor mode for a nice writing environment.  This helps improve general word processing type features
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package olivetti
   :ensure t
   :init
   (setq olivetti-body-width 80))
-#+END_SRC
+#+end_src
 
 **** SmartParens
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package smartparens
   :ensure t
   :init
@@ -471,11 +470,11 @@ A minor mode for a nice writing environment.  This helps improve general word pr
   :config
   (sp-use-smartparens-bindings)
   (smartparens-global-mode 1))
-#+END_SRC
+#+end_src
 
 **** Dired
 These extend the emacs file features a bit to give me a nice sidebar and view when browsing files
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
   :ensure t
@@ -519,10 +518,10 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
 
 (setq gnus-dired-mail-mode 'mu4e-user-agent)
 (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
-#+END_SRC
+#+end_src
 
 **** Projectile
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package projectile
   :ensure t
   :demand
@@ -536,11 +535,11 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
                   (projectile-project-name))))
   :config
   (projectile-mode))
-#+END_SRC
+#+end_src
 
 **** Terminal
 There are other terminals available, but vterm seems more responsive and more native of a choice
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package vterm
   :ensure t
   :init
@@ -568,10 +567,10 @@ There are other terminals available, but vterm seems more responsive and more na
    '(shell-pop-shell-type (quote ("vterm" "*vterm*" (lambda nil (vterm)))))
    '(shell-pop-term-shell "/usr/local/bin/zsh")
    '(shell-pop-window-position "bottom")))
-#+END_SRC
+#+end_src
 
 **** FlyCheck
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package flycheck
   :ensure t
   :defer 1
@@ -580,13 +579,13 @@ There are other terminals available, but vterm seems more responsive and more na
   (add-to-list 'flycheck-checkers 'lsp-ui)
   :hook
   (after-init . global-flycheck-mode))
-#+END_SRC
+#+end_src
 
 **** MU4E
 NOTE: This is still a bit experimental, but the basics function.  Lots of improvements are still possible.
 My Configuration for mbsync and msmtp can be found here:
 https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
 (use-package mu4e
   :config
@@ -720,9 +719,9 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (mu4e-alert-set-default-style 'notifier)
   :hook ((after-init . mu4e-alert-enable-mode-line-display)
         (after-init . mu4e-alert-enable-notifications)))
-#+END_SRC
+#+end_src
 ***** MU4E Encryption
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (require 'mml2015)
 (require 'epa-file)
 
@@ -736,82 +735,81 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
 
 (defalias 'ec 'encrypt-message)
 (defalias 'dc 'decrypt-message)
-#+END_SRC
+#+end_src
 **** Helm
 Helm just makes everything better
-#+BEGIN_SRC emacs-lisp
-  (use-package helm
-    :ensure t
-    :demand
-    :diminish helm-mode
-    :init
-    :bind(("C-x f" . helm-recentf)
-    ("C-x b" . helm-mini)
-    ("C-c s" . helm-occur)
-    ("C-c S" . helm-moccur)
-    ("C-x C-b" . helm-buffers-list)
-    ("C-x C-f" . helm-find-files)
-    ("C-x C-r" . helm-resume))
-    :config
-    (helm-mode 1))
+#+begin_src emacs-lisp
+(use-package helm
+  :ensure t
+  :demand
+  :diminish helm-mode
+  :init
+  :bind(("C-x f" . helm-recentf)
+  ("C-x b" . helm-mini)
+  ("C-c s" . helm-occur)
+  ("C-c S" . helm-moccur)
+  ("C-x C-b" . helm-buffers-list)
+  ("C-x C-f" . helm-find-files)
+  ("C-x C-r" . helm-resume))
+  :config
+  (helm-mode 1))
 
-  (use-package helm-swoop
-    :after (helm)
-    :ensure t
-    :bind
-    (("M-i" . helm-swoop)
-     ("C-c M-i" . helm-multi-swoop)
-     ("M-I" . helm-swoop-back-to-last-point)
-     ("C-x M-i" . helm-multi-swoop-all)))
+(use-package helm-swoop
+  :after (helm)
+  :ensure t
+  :bind
+  (("M-i" . helm-swoop)
+   ("C-c M-i" . helm-multi-swoop)
+   ("M-I" . helm-swoop-back-to-last-point)
+   ("C-x M-i" . helm-multi-swoop-all)))
 
-  (use-package helm-smex
-    :ensure t
-    :after (helm smex)
-    :init
-    (setq helm-smex-show-bindings t)
-    :bind(([remap execute-extended-command] . helm-smex)
-    ("M-X" . helm-smex-major-mode-commands)))
+(use-package helm-smex
+  :ensure t
+  :after (helm smex)
+  :init
+  (setq helm-smex-show-bindings t)
+  :bind(([remap execute-extended-command] . helm-smex)
+  ("M-X" . helm-smex-major-mode-commands)))
 
-  (use-package helm-projectile
-    :ensure t
-    :after (projectile helm)
-    :config
-    (helm-projectile-on))
+(use-package helm-projectile
+  :ensure t
+  :after (projectile helm)
+  :config
+  (helm-projectile-on))
 
-  (use-package helm-flx
-    :ensure t
-    :after (helm)
-    :config
-    (helm-flx-mode +1))
+(use-package helm-flx
+  :ensure t
+  :after (helm)
+  :config
+  (helm-flx-mode +1))
 
-  (use-package helm-fuzzier
-    :ensure t
-    :after (helm)
-    :config
-    (helm-fuzzier-mode +1))
+(use-package helm-fuzzier
+  :ensure t
+  :after (helm)
+  :config
+  (helm-fuzzier-mode +1))
 
-  (use-package helm-ag
-    :ensure t
-    :after (helm))
-  
-  (use-package helm-rg
-    :ensure t
-    :after (helm))
+(use-package helm-ag
+  :ensure t
+  :after (helm))
 
-  (use-package helm-mu
-    :ensure t
-    :after (helm))
+(use-package helm-rg
+  :ensure t
+  :after (helm))
 
-  (use-package helm-company
-    :ensure t
-    :after (helm company)
-    :bind (:map company-mode-map ("C-:" . helm-company)
-           :map company-active-map ("C-:" . helm-company)))
+(use-package helm-mu
+  :ensure t
+  :after (helm))
 
-#+END_SRC
+(use-package helm-company
+  :ensure t
+  :after (helm company)
+  :bind (:map company-mode-map ("C-:" . helm-company)
+         :map company-active-map ("C-:" . helm-company)))
+#+end_src
 
 **** Git
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package magit
   :ensure t
   :init
@@ -856,108 +854,169 @@ ad-do-it))
   :ensure t
   :config
   (global-diff-hl-mode))
-#+END_SRC
+#+end_src
 
 **** Org
-#+BEGIN_SRC emacs-lisp
- (use-package org
-   :ensure org-plus-contrib
-   :pin org
+#+begin_src emacs-lisp
+(use-package org
+  :ensure org-plus-contrib
+  :pin org
+  :init
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-window-setup 'current-window)
+  (setq org-startup-folded nil)
+  (setq org-edit-src-content-indentation 0)
+  (setq org-startup-indented t)
+  (setq org-fontify-whole-heading-line t)
+  (setq org-pretty-entities t)
+  (setq org-hide-leading-stars t)
+  (setq org-agenda-files (list "~/org/org-files/"))
+  :bind
+  (("C-c l" . 'org-store-link)
+   ("C-c a" . 'org-agenda)
+   ("C-c c" . 'org-capture))
+  :config
+  (setq org-directory "~/org/org-files/")
+   ;; Split up the search string on whitespace
+  (setq org-agenda-search-view-always-boolean t)
+  ;;Do not make last capture bookmarks.  I do not like them
+  (setq org-capture-bookmark nil)
+  ;;Set Keywords
+    (setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+        (sequence "WAITING(w)" "|" "CANCELLED(c)")))
+  ;; Log when task complete
+  (setq org-log-done t)
+  ;; Behaviour for capturing notes using make-capture-frame
+  (defadvice org-capture-finalize
+    (after delete-capture-frame activate)
+  "Advise capture-finalize to close the frame"
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
+
+(defadvice org-capture-destroy
+    (after delete-capture-frame activate)
+  "Advise capture-destroy to close the frame"
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
+
+(defadvice org-switch-to-buffer-other-window
+    (after supress-window-splitting activate)
+  "Delete the extra window if we're in a capture frame"
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-other-windows)))
+  ;;What languages do we care to do
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((restclient . t)
+     (browser . t)
+     (shell . t)
+     (scheme . t)
+     (gnuplot . t)
+     (plantuml . t)
+     (js . t))))
+
+  (use-package org-protocol)
+
+  (use-package org-habit
+    :ensure nil)
+
+  (use-package ob-restclient
+    :ensure t)
+
+  (use-package ob-browser
+    :ensure t)
+
+  (use-package toc-org
+    :ensure t
+    :after org
+    :hook (org-mode . toc-org-enable))
+#+end_src
+***** Reformatting an Org Buffer
+From the org mailing list. A function that reformats the current buffer by regenerating the text from its internal parsed representation. 
+#+begin_src emacs-lisp
+(defun my/org-reformat-buffer ()
+  (interactive)
+  (when (y-or-n-p "Really format current buffer? ")
+    (let ((document (org-element-interpret-data (org-element-parse-buffer))))
+      (erase-buffer)
+      (insert document)
+      (goto-char (point-min)))))
+#+end_src
+***** Org-Super-Agenda
+I primarily use this for cleaning up the agenda view so that I can get better header filtering and remove duplicates in my agenda
+#+begin_src emacs-lisp
+(use-package org-super-agenda
+   :ensure t
+   :after org-agendia
    :init
-   (setq org-src-fontify-natively t)
-   (setq org-src-tab-acts-natively t)
-   (setq org-confirm-babel-evaluate nil)
-   (setq org-src-window-setup 'current-window)
-   (setq org-startup-folded nil)
-   (setq org-edit-src-content-indentation 0)
-   (setq org-startup-indented t)
-   (setq org-fontify-whole-heading-line t)
-   (setq org-pretty-entities t)
-   (setq org-hide-leading-stars t)
-   (setq org-agenda-files (list "~/org/org-files/"))
-   :bind
-   (("C-c l" . 'org-store-link)
-    ("C-c a" . 'org-agenda)
-    ("C-c c" . 'org-capture))
-   :config
-   (setq org-directory "~/org/org-files/")
-    ;; Split up the search string on whitespace
-   (setq org-agenda-search-view-always-boolean t)
-   ;;Do not make last capture bookmarks.  I do not like them
-   (setq org-capture-bookmark nil)
-   ;;Set Keywords
-     (setq org-todo-keywords
-       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-         (sequence "WAITING(w)" "|" "CANCELLED(c)")))
-   ;; Log when task complete
-   (setq org-log-done t)
-   ;; Behaviour for capturing notes using make-capture-frame
-   (defadvice org-capture-finalize
-     (after delete-capture-frame activate)
-   "Advise capture-finalize to close the frame"
-   (if (equal "capture" (frame-parameter nil 'name))
-       (delete-frame)))
-
- (defadvice org-capture-destroy
-     (after delete-capture-frame activate)
-   "Advise capture-destroy to close the frame"
-   (if (equal "capture" (frame-parameter nil 'name))
-       (delete-frame)))
-
- (defadvice org-switch-to-buffer-other-window
-     (after supress-window-splitting activate)
-   "Delete the extra window if we're in a capture frame"
-   (if (equal "capture" (frame-parameter nil 'name))
-       (delete-other-windows)))
-   ;;What languages do we care to do
-   (org-babel-do-load-languages
-    'org-babel-load-languages
-    '((restclient . t)
-      (browser . t)
-      (shell . t)
-      (scheme . t)
-      (gnuplot . t)
-      (plantuml . t)
-      (js . t))))
-
-   (use-package org-protocol)
-
-   (use-package ob-restclient
-     :ensure t)
-
-   (use-package ob-browser
-     :ensure t)
-
-   (use-package org-super-agenda
-     :ensure t)
-
-   (use-package toc-org
-     :ensure t
-     :after org
-     :hook (org-mode . toc-org-enable))
-#+END_SRC
+  (setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator nil
+      org-agenda-compact-blocks t
+      org-agenda-start-day nil ;; i.e. today
+      org-agenda-span 1
+      org-agenda-start-on-weekday nil)
+  (setq org-agenda-custom-commands
+        '(("c" "Super view"
+           ((agenda "" ((org-agenda-overriding-header "")
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                                  :time-grid t
+                                  :date today
+                                  :order 1)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:log t)
+                            (:name "Next to do"
+                                   :todo "NEXT"
+                                   :order 1)
+                            (:name "Important"
+                                   :priority "A"
+                                   :order 6)
+                            (:name "Today's tasks"
+                                   :file-path "journal/")
+                            (:name "Due Today"
+                                   :deadline today
+                                   :order 2)
+                            (:name "Scheduled Soon"
+                                   :scheduled future
+                                   :order 8)
+                            (:name "Overdue"
+                                   :deadline past
+                                   :order 7)
+                            (:discard (:not (:todo "TODO")))))))))))
+  :config
+  (org-super-agenda-mode))
+#+end_src
 ***** Org Crypt
 This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
 will be automatically encrypted when saved. Preventing tag inheritance prevents encrypted text inside encrypted text.  More can be found in the org
 mode manual here: https://orgmode.org/worg/org-tutorials/encrypting-files.html
-#+BEGIN_SRC emacs-lisp
-(require 'org-crypt)
-(org-crypt-use-before-save-magic)
-(setq org-tags-exclude-from-inheritance (quote ("crypt")))
+#+begin_src emacs-lisp
+(use-package org-crypt
+ :ensure nil
+ :config
+   (org-crypt-use-before-save-magic)
+   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+ :custom
 ;; GPG key to use for encryption
 ;; Either the Key ID or set to nil to use symmetric encryption.
-(setq org-crypt-key nil)
-#+END_SRC
+(org-crypt-key nil))
+#+end_src
 ***** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-cliplink
   :ensure t
   :bind ("C-x p i" . org-cliplink))
-#+END_SRC
+#+end_src
 ***** Org-Download
-https://github.com/abo-abo/org-download Lets me drap and capture images into my org files
-#+BEGIN_SRC emacs-lisp
+https://github.com/abo-abo/org-download Lets me drop and capture images into my org files
+#+begin_src emacs-lisp
 (use-package org-download
   :ensure t
   :after org
@@ -965,10 +1024,10 @@ https://github.com/abo-abo/org-download Lets me drap and capture images into my 
   (:map org-mode-map
         (("s-Y" . org-download-screenshot)
          ("s-y" . org-download-yank))))
-#+END_SRC
+#+end_src
 ***** Org-Ref
 Captures bibtext entries in an org file, and can look them up online.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-ref
   :ensure t
   :after org
@@ -988,14 +1047,14 @@ Captures bibtext entries in an org file, and can look them up online.
    (setq bibtex-completion-pdf-open-function
      (lambda (fpath)
        (start-process "open" "*open*" "open" fpath))))
-#+END_SRC
+#+end_src
 ***** Org-noter
 Allows me to add notes to documents I can open in emacs.  This is nice because it stores the notes in an org file, not in the document directly like typical annotations
  https://github.com/weirdNox/org-noter
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-noter
   :ensure t)
-#+END_SRC
+#+end_src
 ***** Org Capture Templates
 (t) allows me to capture general tasks.  It has some basic link features to show the source
 (l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard.  It will prompt for a tag value too.  I'd like at least one by default to ensure that I can search easier later
@@ -1004,7 +1063,7 @@ Allows me to add notes to documents I can open in emacs.  This is nice because i
 (c) is a contact entry
 (f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
 (s) just a quick capture template for scratch stuff I want to keep for longer than my emacs session
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
   ;; inhibit inserting the heading; org-capture will insert the heading.
@@ -1074,9 +1133,9 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
      ("t" "Task" entry (file+headline "~/org/org-files/todo.org" "Tasks"),
       my/org-basic-task-template
       :empty-lines 1))))
-#+END_SRC
+#+end_src
 ***** Org Roam
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-roam
       :ensure t
       :hook (after-init . org-roam-mode)
@@ -1101,9 +1160,9 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
       :ensure t
       :config
       (push 'company-org-roam company-backends))
-#+END_SRC
+#+end_src
 ***** Org Journal
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-journal
   :after org
   :ensure t
@@ -1114,25 +1173,25 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
   (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
-#+END_SRC
+#+end_src
 ***** Org Contacts
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-contacts
   :ensure nil
   :after org
   :custom (org-contacts-files '("~/org/contacts/contacts.org")))
-#+END_SRC
+#+end_src
 ***** Org Superstar
 Its like org-bullets, but better
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-superstar
   :ensure t
   :init
     (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))) 
-#+END_SRC
+#+end_src
 
 **** Company
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package company
   :ensure t
   :diminish company-mode
@@ -1151,10 +1210,10 @@ Its like org-bullets, but better
   :after (company)
   :config
   (company-quickhelp-mode))
-#+END_SRC
+#+end_src
 **** Deft
 I need a better way to search through my org notes.  If I can find it with this, a ripgrep will usually get the job done.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package deft
   :ensure t
   :bind ("<f8>" . deft)
@@ -1164,10 +1223,10 @@ I need a better way to search through my org notes.  If I can find it with this,
   (setq deft-directory "~/org")
   (setq deft-recursive t)
   (setq deft-use-filename-as-title t))
-#+END_SRC
+#+end_src
 **** PDF Tools
 PDF Tools is, among other things, a replacement of DocView for PDF files. The key difference is that pages are not pre-rendered by e.g. ghostscript and stored in the file-system, but rather created on-demand and stored in memory.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package pdf-tools
   :ensure t
   :defer 1
@@ -1186,19 +1245,19 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
   (pdf-view-display-size 'fit-page)
   (pdf-view-resize-factor 1.1)
   (pdf-view-use-unicode-ligther nil))
-#+END_SRC
+#+end_src
 *** Languages
 **** Docker
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package docker-compose-mode
   :ensure t)
 (use-package dockerfile-mode
   :ensure t)
 (use-package dotenv-mode
   :ensure t)
-#+END_SRC
+#+end_src
 **** Shell
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 ;;Make sure you have shellcheck installed for this to work
 (use-package flymake-shellcheck
   :commands flymake-shellcheck-load
@@ -1209,9 +1268,9 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
 (use-package sh-script
   :ensure nil
   :hook (after-save . executable-make-buffer-file-executable-if-script-p))
-#+END_SRC
+#+end_src
 **** Golang
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun my-go-mode-hook ()
   (add-hook 'before-save-hook 'gofmt-before-save))
 (use-package go-mode
@@ -1222,10 +1281,10 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
 (use-package flymake-go
   :ensure t)
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
-#+END_SRC
+#+end_src
 **** LSP Mode
 Lsp allows us to utilize the same interface to multiple languages
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package lsp-mode
   :ensure t
   :commands lsp
@@ -1256,10 +1315,10 @@ Lsp allows us to utilize the same interface to multiple languages
   :custom
    (company-lsp-enable-snippet t)
    (company-lsp-cache-candidates t))
-#+END_SRC
+#+end_src
 
 **** Javascript
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (setq js-switch-indent-offset 2)
 (setq js-indent-level 2)
 
@@ -1298,19 +1357,19 @@ Lsp allows us to utilize the same interface to multiple languages
    :ensure t
    :after add-node-modules-path
    :hook (js-mode . prettier-js-mode))
-#+END_SRC
+#+end_src
 
 **** JSON
-#+BEGIN_SRC emacs-lisp
-  ;;JSON
-  (use-package json-mode
-    :ensure t
-    :mode (("\\.json\\'" . json-mode)
-     ("\\manifest.webapp\\'" . json-mode )
-     ("\\.tern-project\\'" . json-mode)))
-#+END_SRC
+#+begin_src emacs-lisp
+;;JSON
+(use-package json-mode
+  :ensure t
+  :mode (("\\.json\\'" . json-mode)
+   ("\\manifest.webapp\\'" . json-mode )
+   ("\\.tern-project\\'" . json-mode)))
+#+end_src
 **** Rust
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package rust-mode
    :ensure t
    :init
@@ -1340,123 +1399,123 @@ Lsp allows us to utilize the same interface to multiple languages
 (add-hook 'rust-mode-hook 'lsp)
 (add-hook 'rust-mode-hook 'company-mode)
 (add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
-#+END_SRC
+#+end_src
 **** Terraform
-#+Begin_SRC emacs-lisp
-  (use-package terraform-mode
-    :ensure t )
+#+begin_src emacs-lisp
+(use-package terraform-mode
+  :ensure t )
 
-  (use-package company-terraform
-    :ensure t
-    :config (company-terraform-init) )
-#+END_SRC
+(use-package company-terraform
+  :ensure t
+  :config (company-terraform-init) )
+#+end_src
 
 **** Web
-#+BEGIN_SRC emacs-lisp
-  (use-package web-mode
-    :ensure t
-    :mode (("\\.phtml\\'" . web-mode)
-     ("\\.tpl\\.php\\'" . web-mode)
-     ("\\.blade\\.php\\'" . web-mode)
-     ("\\.jsp\\'" . web-mode)
-     ("\\.as[cp]x\\'" . web-mode)
-     ("\\.erb\\'" . web-mode)
-     ("\\.html?\\'" . web-mode)
-     ("\\.ejs\\'" . web-mode)
-     ("\\.php\\'" . web-mode)
-     ("\\.mustache\\'" . web-mode)
-     ("/\\(views\\|html\\|theme\\|templates\\)/.*\\.php\\'" . web-mode))
-    :init
-    (setq web-mode-markup-indent-offset 2)
-    (setq web-mode-attr-indent-offset 2)
-    (setq web-mode-attr-value-indent-offset 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-css-indent-offset 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-enable-auto-closing t)
-    (setq web-mode-enable-auto-pairing t)
-    (setq web-mode-enable-comment-keywords t)
-    (setq web-mode-enable-current-element-highlight t))
+#+begin_src emacs-lisp
+(use-package web-mode
+  :ensure t
+  :mode (("\\.phtml\\'" . web-mode)
+   ("\\.tpl\\.php\\'" . web-mode)
+   ("\\.blade\\.php\\'" . web-mode)
+   ("\\.jsp\\'" . web-mode)
+   ("\\.as[cp]x\\'" . web-mode)
+   ("\\.erb\\'" . web-mode)
+   ("\\.html?\\'" . web-mode)
+   ("\\.ejs\\'" . web-mode)
+   ("\\.php\\'" . web-mode)
+   ("\\.mustache\\'" . web-mode)
+   ("/\\(views\\|html\\|theme\\|templates\\)/.*\\.php\\'" . web-mode))
+  :init
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-attr-indent-offset 2)
+  (setq web-mode-attr-value-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-enable-auto-closing t)
+  (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-enable-comment-keywords t)
+  (setq web-mode-enable-current-element-highlight t))
 
-  (use-package company-web
-    :ensure t
-    :hook (web-mode . (lambda ()
-      (add-to-list 'company-backends 'company-web-html)
-      (add-to-list 'company-backends 'company-web-jade)
-      (add-to-list 'company-backends 'company-web-slim))))
+(use-package company-web
+  :ensure t
+  :hook (web-mode . (lambda ()
+    (add-to-list 'company-backends 'company-web-html)
+    (add-to-list 'company-backends 'company-web-jade)
+    (add-to-list 'company-backends 'company-web-slim))))
 
-  (use-package emmet-mode
-    :ensure t
-    :hook (web-mode sgml-mode html-mode css-mode))
+(use-package emmet-mode
+  :ensure t
+  :hook (web-mode sgml-mode html-mode css-mode))
 
-  (use-package rainbow-mode
-    :ensure t
-    :pin gnu
-    :hook css-mode)
+(use-package rainbow-mode
+  :ensure t
+  :pin gnu
+  :hook css-mode)
 
-  (use-package simple-httpd
-    :ensure t)
+(use-package simple-httpd
+  :ensure t)
 
-  (use-package impatient-mode
-    :ensure t)
-#+END_SRC
+(use-package impatient-mode
+  :ensure t)
+#+end_src
 
 **** Python
-#+BEGIN_SRC emacs-lisp
-  (use-package python-mode
-    :ensure t)
-  
-  (use-package blacken
-    :ensure t)
+#+begin_src emacs-lisp
+(use-package python-mode
+  :ensure t)
 
-  (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-  
-  (use-package lsp-python-ms
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-python-ms)
-                          (lsp))))  ; or lsp-deferred
-#+END_SRC
+(use-package blacken
+  :ensure t)
+
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+
+(use-package lsp-python-ms
+:ensure t
+:hook (python-mode . (lambda ()
+                        (require 'lsp-python-ms)
+                        (lsp))))  ; or lsp-deferred
+#+end_src
 
 **** Markdown
-#+BEGIN_SRC emacs-lisp
-  (use-package markdown-mode
-    :ensure t
-    :commands (markdown-mode gfm-mode)
-    :mode (("README\\.md\\'" . gfm-mode)
-     ("\\.md\\'" . markdown-mode)
-     ("\\.markdown\\'" . markdown-mode))
-    :init
-    (setq markdown-command "multimarkdown")
-    (setq markdown-header-scaling t))
-#+END_SRC
+#+begin_src emacs-lisp
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+   ("\\.md\\'" . markdown-mode)
+   ("\\.markdown\\'" . markdown-mode))
+  :init
+  (setq markdown-command "multimarkdown")
+  (setq markdown-header-scaling t))
+#+end_src
 
 **** Lua
-#+BEGIN_SRC emacs-lisp
-  (use-package lua-mode
-    :ensure t
-    :mode ("\\.lua\\'" . lua-mode))
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :ensure t
+  :mode ("\\.lua\\'" . lua-mode))
 
-  (use-package company-lua
-    :ensure t
-    :init
-    (add-hook 'lua-mode-hook (lambda ()
-             (add-to-list 'company-backends 'company-lua))))
-#+END_SRC
+(use-package company-lua
+  :ensure t
+  :init
+  (add-hook 'lua-mode-hook (lambda ()
+           (add-to-list 'company-backends 'company-lua))))
+#+end_src
 
 **** YAML
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package yaml-mode
   :ensure t
   :mode 
     ("\\.yaml\\'" . yaml-mode)
     ("\\.yml\\'" . yaml-mode))
-#+END_SRC
+#+end_src
 
 ** Review and remove
 **** Ledger mode
- I'm experimenting with ledger financial system
- #+BEGIN_SRC emacs-lisp
+I'm experimenting with ledger financial system
+#+begin_src emacs-lisp
 (use-package ledger-mode
   :ensure t
   :mode ("\\.dat\\'"
@@ -1488,4 +1547,4 @@ Lsp allows us to utilize the same interface to multiple languages
 (use-package flycheck-ledger
   :ensure t 
   :after ledger-mode)
- #+END_SRC
+#+end_src
