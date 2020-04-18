@@ -50,6 +50,7 @@
       - [[#lsp-mode][LSP Mode]]
       - [[#javascript][Javascript]]
       - [[#json][JSON]]
+      - [[#ruby][Ruby]]
       - [[#rust][Rust]]
       - [[#terraform][Terraform]]
       - [[#web][Web]]
@@ -1281,6 +1282,15 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
   :ensure t
   :config
   (helm-cider-mode 1))
+
+(use-package flycheck-clojure
+  :ensure t
+  :init
+  (add-hook 'after-init-hook 'global-flycheck-mode)
+  :config
+  (use-package flycheck
+    :config
+    (flycheck-clojure-setup)))
 #+end_src
 **** Shell
 #+begin_src emacs-lisp
@@ -1328,6 +1338,9 @@ Lsp allows us to utilize the same interface to multiple languages
    (rust-mode . lsp)
    (python-mode . lsp)
    (clojure-mode . lsp)
+   (dockerfile-mode . lsp)
+   (go-mode . lsp)
+   (ruby-mode . lsp)
    (sh-mode . lsp))
 
 (use-package lsp-rust
@@ -1401,6 +1414,28 @@ Lsp allows us to utilize the same interface to multiple languages
   :mode (("\\.json\\'" . json-mode)
    ("\\manifest.webapp\\'" . json-mode )
    ("\\.tern-project\\'" . json-mode)))
+#+end_src
+
+**** Ruby
+#+begin_src emacs-lisp
+(use-package ruby-mode
+  :ensure t
+  :mode (("\\.rb\\'" . ruby-mode)
+  ("\\.rake\\'" . ruby-mode)
+  ("\\.Rakefile\\'" . ruby-mode)
+  ("\\Gemfile\\'" . ruby-mode)))
+
+(use-package rvm
+  :ensure t
+  :config
+  (rvm-use-default))
+
+;; a lint checker for ruby
+(use-package rubocop
+  :ensure t
+  :init
+  (add-hook 'ruby-mode-hook 'rubocop-mode)
+  :diminish rubocop-mode)
 #+end_src
 **** Rust
 #+begin_src emacs-lisp
