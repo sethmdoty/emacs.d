@@ -895,6 +895,14 @@ ad-do-it))
     (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
         (sequence "WAITING(w)" "|" "CANCELLED(c)")))
+  ;; My Default org-mode tags
+    (setq org-tag-alist '(("@coding" . ?c)
+                   ("@email" . ?e)
+                   ("@home" . ?h)
+                   ("@reading" . ?r)
+                   ("@learning" . ?l)
+                   ("@work" . ?b)
+                   ("@writing" . ?w)))
   ;; Log when task complete
   (setq org-log-done t)
   ;; Behaviour for capturing notes using make-capture-frame
@@ -1110,7 +1118,7 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   :END:
   Ingredients\n 
   %?\n
-  ** Directions\n")
+  ,** Directions\n")
 
   (defvar my/org-project-template "* TODO [#A] %^{Task}
 :PROPERTIES:
