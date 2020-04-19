@@ -58,8 +58,9 @@
       - [[#markdown][Markdown]]
       - [[#lua][Lua]]
       - [[#yaml][YAML]]
-  - [[#review-and-remove][Review and remove]]
+  - [[#review-andor-remove][Review and/or remove]]
       - [[#ledger-mode][Ledger mode]]
+      - [[#org-chef][Org-chef]]
 
 * Configuration
 
@@ -69,15 +70,9 @@ First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source 
 
 #+begin_src emacs-lisp
 (require 'package)
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (proto (if no-ssl "http" "https")))
-  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
-  (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
-    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")))
 (package-initialize)
 #+end_src
 
@@ -1072,6 +1067,8 @@ Allows me to add notes to documents I can open in emacs.  This is nice because i
 (t) allows me to capture general tasks.  It has some basic link features to show the source
 (l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard.  It will prompt for a tag value too.  I'd like at least one by default to ensure that I can search easier later
 (p) allows me to add projects
+(b) Org Cookbook
+(m) Manual Cookbook
 (j) creates a journal entry
 (c) is a contact entry
 (f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
@@ -1103,6 +1100,18 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 :NOTE: %^{NOTE}
 :END:" "Template for org-contacts.")
 
+(defvar my/org-cookbook-template "* %^{Recipe title:}
+  :PROPERTIES:
+  :source-url:
+  :servings:
+  :prep-time:
+  :cook-time:
+  :ready-in:
+  :END:
+  Ingredients\n 
+  %?\n
+  ** Directions\n")
+
   (defvar my/org-project-template "* TODO [#A] %^{Task}
 :PROPERTIES:
 :END:
@@ -1130,6 +1139,14 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
      ("c" "Contact" entry (file+headline "~/org/contacts/contacts.org" "Contacts"),
       my/org-contacts-template
       :empty-lines 1)
+
+     ("b" "Cookbook" entry (file "~/org/org-files/cookbook.org")
+      "%(org-chef-get-recipe-from-url)"
+         :empty-lines 1)
+     
+     ("m" "Manual Cookbook" entry (file "~/org/org-files/cookbook.org"),
+        my/org-cookbook-template
+        :empty-lines 1)
      
      ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
       my/org-project-template
@@ -1595,7 +1612,7 @@ Lsp allows us to utilize the same interface to multiple languages
     ("\\.yml\\'" . yaml-mode))
 #+end_src
 
-** Review and remove
+** Review and/or remove
 **** Ledger mode
 I'm experimenting with ledger financial system
 #+begin_src emacs-lisp
@@ -1630,4 +1647,10 @@ I'm experimenting with ledger financial system
 (use-package flycheck-ledger
   :ensure t 
   :after ledger-mode)
+#+end_src
+**** Org-chef
+This package lets me manage recipes in org-mode.  It captures the link from the clipboard and grabs what it can
+#+begin_src emacs-lisp
+(use-package org-chef
+  :ensure t)
 #+end_src
