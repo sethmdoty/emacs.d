@@ -604,6 +604,8 @@ https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
   (setq mu4e-use-fancy-chars t)
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-org-contacts-file "~/org/contacts/contacts.org")
+  ;;Set mu4e as default compose mail program
+  (setq mail-user-agent 'mu4e-user-agent)
   ;;This integrates choosing mailboxes with helm
   (setq mu4e-completing-read-function 'completing-read)
   :config
