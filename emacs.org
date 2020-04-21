@@ -1210,7 +1210,6 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
   (org-journal-date-format "%e %b %Y (%A)")
   (org-journal-enable-agenda-integration t)
   (org-journal-dir (format "~/org/journal/" (format-time-string "%Y")))
-  (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
 #+end_src
