@@ -1270,12 +1270,26 @@ Its like org-bullets, but better
   :diminish company-mode
   :defer 0.5
   :delight
+  :config
+  ;; Search other buffers for compleition candidates
+  (setq company-dabbrev-other-buffers t)
+  (setq company-dabbrev-code-other-buffers t)
+
+  ;; Show candidates according to importance, then case, then in-buffer frequency
+  (setq company-transformers '(company-sort-by-backend-importance
+                         company-sort-prefer-same-case-prefix
+                         company-sort-by-occurrence))
+
+   ;; Flushright any annotations for a compleition;
+   ;; e.g., the description of what a snippet template word expands into.
+   company-tooltip-align-annotations t
   :custom
   (company-begin-commands '(self-insert-command))
   (company-idle-delay .1)
   (company-minimum-prefix-length 2)
   (company-show-numbers t)
   (company-tooltip-align-annotations 't)
+
   (global-company-mode t))
 
 (use-package company-quickhelp
