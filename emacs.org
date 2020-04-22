@@ -40,6 +40,7 @@
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
         - [[#org-superstar][Org Superstar]]
+        - [[#org-reveal][Org Reveal]]
       - [[#company][Company]]
       - [[#deft][Deft]]
       - [[#pdf-tools][PDF Tools]]
@@ -1253,6 +1254,13 @@ Its like org-bullets, but better
   :ensure t
   :init
     (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))) 
+#+end_src
+***** Org Reveal
+#+begin_src emacs-lisp
+(use-package ox-reveal
+  :ensure t
+  :config
+  (setq org-reveal-root "file:///~/Documents/reveal.js"))
 #+end_src
 
 **** Company
