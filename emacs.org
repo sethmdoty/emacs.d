@@ -29,6 +29,7 @@
       - [[#org][Org]]
         - [[#reformatting-an-org-buffer][Reformatting an Org Buffer]]
         - [[#org-super-agenda][Org-Super-Agenda]]
+        - [[#org-projectile][Org Projectile]]
         - [[#org-crypt][Org Crypt]]
         - [[#org-cliplink][Org-cliplink]]
         - [[#org-download][Org-Download]]
@@ -536,6 +537,7 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
           (format " Pr[%s]"
                   (projectile-project-name))))
   :config
+  (setq projectile-completion-system 'helm)
   (projectile-mode))
 #+end_src
 
@@ -584,9 +586,8 @@ There are other terminals available, but vterm seems more responsive and more na
 #+end_src
 
 **** MU4E
-NOTE: This is still a bit experimental, but the basics function.  Lots of improvements are still possible.
-My Configuration for mbsync and msmtp can be found here:
-https://sethmdoty.gitbook.io/tech-tips/emacs/m4ue
+My Configuration for mbsync and msmtp can be found in my dotfiles repo here:
+https://github.com/sethmdoty/dotfiles
 #+begin_src emacs-lisp
 (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
 (use-package mu4e
@@ -805,6 +806,10 @@ Helm just makes everything better
   :ensure t
   :after (helm))
 
+(use-package helm-org
+  :ensure t
+  :defer 10)
+
 (use-package helm-company
   :ensure t
   :after (helm company)
@@ -968,7 +973,7 @@ I primarily use this for cleaning up the agenda view so that I can get better he
 #+begin_src emacs-lisp
 (use-package org-super-agenda
    :ensure t
-   :after org-agendia
+   :after org-agenda
    :init
   (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
@@ -1009,6 +1014,27 @@ I primarily use this for cleaning up the agenda view so that I can get better he
                             (:discard (:not (:todo "TODO")))))))))))
   :config
   (org-super-agenda-mode))
+#+end_src
+***** Org Projectile
+#+begin_src emacs-lisp
+(use-package org-projectile
+  :ensure t
+  :bind (("C-c n p" . org-projectile-project-todo-completing-read)
+         ("C-c c" . org-capture))
+  :config
+  (progn
+    (setq org-projectile-projects-file
+          "~/org/org-files/projects.org")
+    (setq    (add-to-list 'org-capture-templates
+                 (org-projectile-project-todo-entry
+                  :capture-character "p")))
+    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+    (push (org-projectile-project-todo-entry) org-capture-templates)))
+
+(use-package org-projectile-helm
+  :ensure t
+  :after org-projectile
+  :bind (("C-c n p" . org-projectile-helm-template-or-project)))
 #+end_src
 ***** Org Crypt
 This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
@@ -1122,10 +1148,10 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   %?\n
   ,** Directions\n")
 
-  (defvar my/org-project-template "* TODO [#A] %^{Task}
-:PROPERTIES:
-:END:
-Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
+;;   (defvar my/org-project-template "* TODO [#A] %^{Task}
+;; :PROPERTIES:
+;; :END:
+;; Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
  (defvar my/org-web-bookmark-template "* %(org-cliplink-capture)
 :PROPERTIES:
@@ -1158,9 +1184,9 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
         my/org-cookbook-template
         :empty-lines 1)
      
-     ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
-      my/org-project-template
-      :empty-lines 1)
+     ;; ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
+     ;;  my/org-project-template
+     ;;  :empty-lines 1)
 
      ("s" "Scratch File" entry (file "~/org/scratch/scratch.org"))
 
@@ -1210,7 +1236,6 @@ Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
   (org-journal-date-format "%e %b %Y (%A)")
   (org-journal-enable-agenda-integration t)
   (org-journal-dir (format "~/org/journal/" (format-time-string "%Y")))
-  (org-journal-enable-encryption t)
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
 #+end_src
@@ -1341,6 +1366,9 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
   :hook (go-mode-hook my-go-mode-hook))
 (use-package company-go
   :ensure t)
+(use-package go-projectile
+   :ensure t 
+   :demand t)
 (use-package flymake-go
   :ensure t)
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
