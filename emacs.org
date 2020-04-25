@@ -278,7 +278,6 @@ Set titlebar style
 (add-hook 'delete-frame-functions (lambda () (interactive)(save-some-buffers t)))
 #+end_src
 
-
 *** Provide custom buffer-cleanup functions
 #+begin_src emacs-lisp
 (defun kill-dired-buffers ()
@@ -391,16 +390,6 @@ We don't want that annoying floating frame that ediff uses by default.
   :bind(("C-z" . undo-tree-undo)
         ("C-M-z" . undo-tree-redo)))
 
-(use-package hydra
-  :ensure t)
-
-(use-package ibuffer
-  :bind( "C-x C-b" . ibuffer))
-
-(use-package ibuffer-sidebar
-  :after (ibuffer)
-  :ensure t)
-
 (use-package smex
   :ensure t)
 
@@ -452,6 +441,7 @@ This makes moving around multiple windows a lot easier
 (use-package ace-window
   :ensure t
   :bind([remap other-window] . ace-window)
+  :defer 2
   :init
   (setq aw-dispatch-always t)
   :config
@@ -464,6 +454,7 @@ This makes moving around multiple windows a lot easier
 #+begin_src emacs-lisp
 (use-package yasnippet
   :ensure t
+  :defer 1
   :diminish yas-minor-mode
   :hook
   (prog-mode . yas-minor-mode)
@@ -481,6 +472,7 @@ A minor mode for a nice writing environment.  This helps improve general word pr
 #+begin_src emacs-lisp
 (use-package olivetti
   :ensure t
+  :defer t
   :init
   (setq olivetti-body-width 80))
 #+end_src
@@ -489,6 +481,7 @@ A minor mode for a nice writing environment.  This helps improve general word pr
 #+begin_src emacs-lisp
 (use-package smartparens
   :ensure t
+  :defer 1
   :init
   (require 'smartparens-config)
   :config
@@ -499,24 +492,6 @@ A minor mode for a nice writing environment.  This helps improve general word pr
 **** Dired
 These extend the emacs file features a bit to give me a nice sidebar and view when browsing files
 #+begin_src emacs-lisp
-(use-package dired-sidebar
-  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
-  :ensure t
-  :commands (dired-sidebar-toggle-sidebar)
-  :init
-  (add-hook 'dired-sidebar-mode-hook
-            (lambda ()
-              (unless (file-remote-p default-directory)
-                (auto-revert-mode))))
-  :config
-  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-
-  (setq dired-sidebar-subtree-line-prefix "__")
-  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
-  (setq dired-sidebar-use-term-integration t)
-  (setq dired-sidebar-use-custom-font t))
-
 (use-package dired-subtree
   :ensure t)
 
@@ -548,6 +523,7 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
 #+begin_src emacs-lisp
 (use-package projectile
   :ensure t
+  :defer 2
   :demand
   :bind (:map projectile-mode-map
               ("C-c p" . projectile-command-map))
@@ -817,17 +793,13 @@ Helm just makes everything better
   :ensure t
   :after (helm)
   :config
-  (helm-flx-mode +1))
+  (helm-flx-mode 1))
 
 (use-package helm-fuzzier
   :ensure t
   :after (helm)
   :config
-  (helm-fuzzier-mode +1))
-
-(use-package helm-ag
-  :ensure t
-  :after (helm))
+  (helm-fuzzier-mode 1))
 
 (use-package helm-rg
   :ensure t
@@ -852,6 +824,7 @@ Helm just makes everything better
 #+begin_src emacs-lisp
 (use-package magit
   :ensure t
+  :defer 1
   :init
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1 )
   :bind("C-x g" . magit-status)
@@ -1298,7 +1271,7 @@ Its like org-bullets, but better
 (use-package company
   :ensure t
   :diminish company-mode
-  :defer 0.5
+  :defer 1
   :delight
   :config
   ;; Search other buffers for compleition candidates
@@ -1329,7 +1302,7 @@ Its like org-bullets, but better
   (company-quickhelp-mode))
 #+end_src
 **** Deft
-I need a better way to search through my org notes.  If I can find it with this, a ripgrep will usually get the job done.
+I need a better way to search through my org notes.  If I can't find it with this, a ripgrep will usually get the job done.
 #+begin_src emacs-lisp
 (use-package deft
   :ensure t
@@ -1346,7 +1319,7 @@ PDF Tools is, among other things, a replacement of DocView for PDF files. The ke
 #+begin_src emacs-lisp
 (use-package pdf-tools
   :ensure t
-  :defer 1
+  :defer t
   :magic ("%PDF" . pdf-view-mode)
   :init (pdf-tools-install :no-query))
 
@@ -1631,6 +1604,11 @@ Lsp allows us to utilize the same interface to multiple languages
   :pin gnu
   :hook css-mode)
 
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
 (use-package simple-httpd
   :ensure t)
 
@@ -1708,6 +1686,7 @@ I'm experimenting with ledger financial system
 #+begin_src emacs-lisp
 (use-package ledger-mode
   :ensure t
+  :defer t
   :mode ("\\.dat\\'"
          "\\.ledger\\'")
   :bind (:map ledger-mode-map
