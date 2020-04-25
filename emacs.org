@@ -125,8 +125,6 @@ Make sure [[https://github.com/jwiegley/use-package][use-package]] is available,
   :ensure t
   :init
   (setq doom-modeline-icon t)
-  (setq doom-modeline-buffer-file-name-style 'relative-to-project
-        doom-modeline-project-detection 'projectile)
   :config
   (doom-modeline-mode 1))
 
