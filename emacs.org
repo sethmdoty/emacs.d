@@ -625,7 +625,7 @@ https://github.com/sethmdoty/dotfiles
   (setq mu4e-headers-include-related t)
   (setq mu4e-attachment-dir  "~/Downloads")
   ;; This prevents saving the email to the Sent folder since my email will do this for us on their end.
-  ;; (setq mu4e-sent-messages-behavior 'delete)
+  (setq mu4e-sent-messages-behavior 'delete)
   ;;so many buffers...
   (setq message-kill-buffer-on-exit t)
   ;; Enable inline images.
