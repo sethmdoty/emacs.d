@@ -4,9 +4,12 @@
 
 * Table Of Contents                                                :TOC_5_gh:
 - [[#configuration][Configuration]]
+  - [[#init-gc-settings][Init GC Settings]]
   - [[#package-management][Package Management]]
     - [[#straightel][Straight.el]]
+    - [[#auto-compile][Auto Compile]]
     - [[#sources][Sources]]
+    - [[#server][Server]]
     - [[#fonts][Fonts]]
     - [[#use-package][Use-Package]]
   - [[#editor-configuration][Editor Configuration]]
@@ -67,6 +70,21 @@
       - [[#org-chef][Org-chef]]
 
 * Configuration
+** Init GC Settings
+
+We set GC settings to better values for init now, and then reset them to saner values later.
+
+#+BEGIN_SRC emacs-lisp
+  (eval-and-compile
+    (setq gc-cons-threshold 402653184
+          gc-cons-percentage 0.6))
+#+END_SRC
+
+Also the compiler to keep quiet about free vars and the like, which will inevitably pop up on compilation with all the packages we use.
+
+#+BEGIN_SRC emacs-lisp
+  (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+#+END_SRC
 
 ** Package Management
 *** Straight.el
@@ -85,6 +103,14 @@ I woud like to use this as my primary package manager, but it is significatntly 
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 #+end_src
+*** Auto Compile
+#+begin_src emacs-lisp
+(use-package auto-compile
+  :straight (:type git :host github :repo "emacscollective/auto-compile")
+  :load-path "~/.emacs.d/straight/repos/auto-compile~"
+  :config (auto-compile-on-load-mode))
+(setq load-prefer-newer t)
+#+end_src
 *** Sources
 First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source for packages
 
@@ -94,6 +120,10 @@ First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source 
                          ("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")))
 (package-initialize)
+#+end_src
+*** Server
+#+begin_src emacs-lisp
+   (server-start) 
 #+end_src
 
 *** Fonts
@@ -860,12 +890,6 @@ ad-do-it))
 
 (use-package gitignore-mode
   :ensure t)
-
-(use-package magit-todos
-  :ensure t
-  :after magit
-  :config
-  (magit-todos-mode))
 
 (use-package diff-hl
   :ensure t
