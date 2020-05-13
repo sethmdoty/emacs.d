@@ -1466,15 +1466,6 @@ Lsp allows us to utilize the same interface to multiple languages
 (use-package helm-lsp
   :ensure t
   :commands helm-lsp-workspace-symbol)
-
-(use-package company-lsp
-  :ensure t
-  :commands company-lsp
-  :config
-  (push 'company-lsp company-backends)
-  :custom
-   (company-lsp-enable-snippet t)
-   (company-lsp-cache-candidates t))
 #+end_src
 
 **** Javascript
