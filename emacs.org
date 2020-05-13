@@ -26,7 +26,7 @@
       - [[#projectile][Projectile]]
       - [[#terminal][Terminal]]
       - [[#flycheck][FlyCheck]]
-      - [[#flyspell][Flyspell]]
+      - [[#spelling-and-grammar][Spelling and Grammar]]
       - [[#mu4e][MU4E]]
         - [[#mu4e-encryption][MU4E Encryption]]
       - [[#helm][Helm]]
@@ -44,6 +44,7 @@
         - [[#org-roam][Org Roam]]
         - [[#org-journal][Org Journal]]
         - [[#org-contacts][Org Contacts]]
+        - [[#org-chef][Org-chef]]
         - [[#org-superstar][Org Superstar]]
         - [[#org-reveal][Org Reveal]]
       - [[#company][Company]]
@@ -67,7 +68,7 @@
       - [[#yaml][YAML]]
   - [[#review-andor-remove][Review and/or remove]]
       - [[#ledger-mode][Ledger mode]]
-      - [[#org-chef][Org-chef]]
+      - [[#slack][Slack]]
 
 * Configuration
 ** Init GC Settings
@@ -609,7 +610,8 @@ There are other terminals available, but vterm seems more responsive and more na
   :hook
   (after-init . global-flycheck-mode))
 #+end_src
-**** Flyspell
+**** Spelling and Grammar
+Typing is hard, and sometimes its nice to catch the actual errors.
 #+begin_src emacs-lisp
 (use-package flyspell-correct
   :ensure t
@@ -620,6 +622,7 @@ There are other terminals available, but vterm seems more responsive and more na
   :ensure t
   :after flyspell-correct)
 #+end_src
+
 **** MU4E
 My Configuration for mbsync and msmtp can be found in my dotfiles repo here:
 https://github.com/sethmdoty/dotfiles
@@ -1132,6 +1135,7 @@ Allows me to add notes to documents I can open in emacs.  This is nice because i
 (b) Org Cookbook
 (m) Manual Cookbook
 (j) creates a journal entry
+(n) captures the marked text from the active buffer
 (c) is a contact entry
 (f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
 (s) just a quick capture template for scratch stuff I want to keep for longer than my emacs session
@@ -1154,6 +1158,12 @@ Allows me to add notes to documents I can open in emacs.  This is nice because i
 :END:
 Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
 
+  (defvar my/org-basic-note-template "* %^{TITLE} 
+:PROPERTIES:
+:SOURCE:
+:END:
+\n%i%?" "Template for basic notes.")
+
    (defvar my/org-contacts-template "* %(org-contacts-template-name)
 :PROPERTIES:
 :ADDRESS: %{111 Street Street. Omaha,NE, USA}
@@ -1173,11 +1183,6 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   Ingredients\n 
   %?\n
   ,** Directions\n")
-
-;;   (defvar my/org-project-template "* TODO [#A] %^{Task}
-;; :PROPERTIES:
-;; :END:
-;; Captured %<%Y-%m-%d %H:%M>" "Template for project task.")
 
  (defvar my/org-web-bookmark-template "* %(org-cliplink-capture)
 :PROPERTIES:
@@ -1209,10 +1214,10 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
      ("m" "Manual Cookbook" entry (file "~/org/org-files/cookbook.org"),
         my/org-cookbook-template
         :empty-lines 1)
-     
-     ;; ("p" "Project Entry" entry (file "~/org/org-files/projects.org"),
-     ;;  my/org-project-template
-     ;;  :empty-lines 1)
+
+     ("n" "Notes" entry (file my/create-zet-file),
+      my/org-basic-note-template
+      :empty-lines 1)
 
      ("s" "Scratch File" entry (file "~/org/scratch/scratch.org"))
 
@@ -1271,6 +1276,12 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   :ensure nil
   :after org
   :custom (org-contacts-files '("~/org/contacts/contacts.org")))
+#+end_src
+***** Org-chef
+This package lets me manage recipes in org-mode.  It captures the link from the clipboard and grabs what it can
+#+begin_src emacs-lisp
+(use-package org-chef
+  :ensure t)
 #+end_src
 ***** Org Superstar
 Its like org-bullets, but better
@@ -1739,9 +1750,36 @@ I'm experimenting with ledger financial system
   :ensure t 
   :after ledger-mode)
 #+end_src
-**** Org-chef
-This package lets me manage recipes in org-mode.  It captures the link from the clipboard and grabs what it can
+
+**** Slack
+This is kind of cool, but it is not very quick at times. Store your creds in a .authinfo file with something like
+~~host objectpartners.slack.com user seth.doty@objectpartners.com secret {YOUR-API-KEY}~~
 #+begin_src emacs-lisp
-(use-package org-chef
-  :ensure t)
+(use-package slack                      ;
+  :ensure t
+  :commands (slack-start)
+  :init
+  (setq slack-buffer-emojify t) ;; if you want to enable emoji, default nil
+  (setq slack-prefer-current-team t)
+  :config
+(slack-register-team
+ :name "objectpartners"
+ :default t
+ :token (auth-source-pick-first-password
+         :host "objectpartners.slack.com"
+         :user "seth.doty@objectpartners.com"))
+(with-eval-after-load 'tracking
+  (define-key tracking-mode-map [f11]
+    #'tracking-next-buffer))
+;; Ensure the buffer exists when a message arrives on a
+;; channel that wasn't open.
+(setq slack-buffer-create-on-notify t)
+;;Too many status in this UI.  I don't need them and sometimes they display funny
+(defun slack-user-status (_id _team) ""))
+
+(use-package alert
+  :ensure t
+  :commands (alert)
+  :init
+  (setq alert-default-style 'notifier))
 #+end_src
