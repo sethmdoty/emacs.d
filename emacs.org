@@ -488,7 +488,10 @@ This makes moving around multiple windows a lot easier
   :hook
   (prog-mode . yas-minor-mode)
   :config
-  (yas-reload-all))
+  (yas-reload-all)
+  (setq yas-snippet-dirs
+      '("~/.emacs.d/straight/repos/doom-snippets"                 ;; personal snippets
+        )))
 
 (use-package doom-snippets
   :straight (:type git :host github :repo "hlissner/doom-snippets")
