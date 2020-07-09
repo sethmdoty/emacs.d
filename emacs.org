@@ -3,168 +3,86 @@
 #+property: header-args :tangle yes
 
 * Table Of Contents                                                :TOC_5_gh:
-- [[#configuration][Configuration]]
-  - [[#init-gc-settings][Init GC Settings]]
-  - [[#package-management][Package Management]]
-    - [[#straightel][Straight.el]]
-    - [[#auto-compile][Auto Compile]]
-    - [[#sources][Sources]]
-    - [[#server][Server]]
-    - [[#fonts][Fonts]]
-    - [[#use-package][Use-Package]]
+- [[#package-management][Package Management]]
+  - [[#straightel][Straight.el]]
   - [[#editor-configuration][Editor Configuration]]
-  - [[#buffer-colorize][Buffer Colorize]]
-  - [[#speed-up-startup][Speed up Startup]]
-  - [[#ediff][Ediff]]
-  - [[#package-configuration][Package Configuration]]
-    - [[#general][General]]
-      - [[#ace-window-manager][Ace Window Manager]]
-      - [[#yasnippet][Yasnippet]]
-      - [[#olivetti][Olivetti]]
-      - [[#smartparens][SmartParens]]
-      - [[#dired][Dired]]
-      - [[#projectile][Projectile]]
-      - [[#terminal][Terminal]]
-      - [[#flycheck][FlyCheck]]
-      - [[#spelling-and-grammar][Spelling and Grammar]]
-      - [[#mu4e][MU4E]]
-        - [[#mu4e-encryption][MU4E Encryption]]
-      - [[#helm][Helm]]
-      - [[#git][Git]]
-      - [[#org][Org]]
-        - [[#reformatting-an-org-buffer][Reformatting an Org Buffer]]
-        - [[#org-super-agenda][Org-Super-Agenda]]
-        - [[#org-projectile][Org Projectile]]
-        - [[#org-crypt][Org Crypt]]
-        - [[#org-cliplink][Org-cliplink]]
-        - [[#org-download][Org-Download]]
-        - [[#org-ref][Org-Ref]]
-        - [[#org-noter][Org-noter]]
-        - [[#org-capture-templates][Org Capture Templates]]
-        - [[#org-roam][Org Roam]]
-        - [[#org-journal][Org Journal]]
-        - [[#org-contacts][Org Contacts]]
-        - [[#org-chef][Org-chef]]
-        - [[#org-superstar][Org Superstar]]
-        - [[#org-reveal][Org Reveal]]
-      - [[#company][Company]]
-      - [[#deft][Deft]]
-      - [[#pdf-tools][PDF Tools]]
-    - [[#languages][Languages]]
-      - [[#docker][Docker]]
-      - [[#clojure][Clojure]]
-      - [[#shell][Shell]]
-      - [[#golang][Golang]]
-      - [[#lsp-mode][LSP Mode]]
-      - [[#javascript][Javascript]]
-      - [[#json][JSON]]
-      - [[#ruby][Ruby]]
-      - [[#rust][Rust]]
-      - [[#terraform][Terraform]]
-      - [[#web][Web]]
-      - [[#python][Python]]
-      - [[#markdown][Markdown]]
-      - [[#lua][Lua]]
-      - [[#yaml][YAML]]
-  - [[#review-andor-remove][Review and/or remove]]
-      - [[#ledger-mode][Ledger mode]]
-      - [[#slack][Slack]]
+- [[#buffer-colorize][Buffer Colorize]]
+- [[#package-configuration][Package Configuration]]
+  - [[#general][General]]
+  - [[#ace-window-manager][Ace Window Manager]]
+  - [[#yasnippet][Yasnippet]]
+  - [[#olivetti][Olivetti]]
+  - [[#smartparens][SmartParens]]
+  - [[#dired][Dired]]
+  - [[#projectile][Projectile]]
+  - [[#terminal][Terminal]]
+  - [[#helm][Helm]]
+  - [[#git][Git]]
+  - [[#company][Company]]
+  - [[#deft][Deft]]
+  - [[#treemacs][Treemacs]]
+- [[#languages][Languages]]
+  - [[#docker][Docker]]
+  - [[#shell][Shell]]
+  - [[#golang][Golang]]
+  - [[#lsp-mode][LSP Mode]]
+  - [[#javascript][Javascript]]
+  - [[#json][JSON]]
+  - [[#ruby][Ruby]]
+  - [[#rust][Rust]]
+  - [[#terraform][Terraform]]
+  - [[#web][Web]]
+  - [[#python][Python]]
+  - [[#markdown][Markdown]]
+  - [[#yaml][YAML]]
+- [[#org][Org]]
+  - [[#org-super-agenda][Org-Super-Agenda]]
+  - [[#org-projectile][Org Projectile]]
+  - [[#org-cliplink][Org-cliplink]]
+  - [[#org-download][Org-Download]]
+  - [[#org-ref][Org-Ref]]
+  - [[#org-roam][Org Roam]]
+  - [[#org-journal][Org Journal]]
+  - [[#org-chef][Org-chef]]
+  - [[#org-superstar][Org Superstar]]
+  - [[#org-reveal][Org Reveal]]
 
-* Configuration
-** Init GC Settings
-
-We set GC settings to better values for init now, and then reset them to saner values later.
-
+* Package Management
+** Straight.el
+Set up straight.el
 #+BEGIN_SRC emacs-lisp
-  (eval-and-compile
-    (setq gc-cons-threshold 402653184
-          gc-cons-percentage 0.6))
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
 #+END_SRC
-
-Also the compiler to keep quiet about free vars and the like, which will inevitably pop up on compilation with all the packages we use.
-
+Use use-package as a frontend for straight
 #+BEGIN_SRC emacs-lisp
-  (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 #+END_SRC
-
-** Package Management
-*** Straight.el
-I woud like to use this as my primary package manager, but it is significatntly more management overhead due to org-mode.  For now it exists for the occasional package I need not in MELPA
-#+begin_src emacs-lisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
-*** Auto Compile
-#+begin_src emacs-lisp
-(use-package auto-compile
-  :straight (:type git :host github :repo "emacscollective/auto-compile")
-  :load-path "~/.emacs.d/straight/repos/auto-compile~"
-  :config (auto-compile-on-load-mode))
-(setq load-prefer-newer t)
-#+end_src
-*** Sources
-First we're going to add [[melpa.org][melpa]] and upstream org-mode as a source for packages
-
-#+begin_src emacs-lisp
-(require 'package)
-(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                         ("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")))
-(package-initialize)
-#+end_src
-*** Server
-#+begin_src emacs-lisp
-   (server-start) 
-#+end_src
-
-*** Fonts
-
-Mono Fonts are great for development, but we need something pretty for general writing.  
-#+begin_src emacs-lisp
-(set-face-attribute 'default nil :font "JetBrains Mono Medium")
-(set-fontset-font t 'latin "Noto Sans")
-#+end_src
-
-
-*** Use-Package
-
-Make sure [[https://github.com/jwiegley/use-package][use-package]] is available, if it's not we install it.
-
-#+begin_src emacs-lisp
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(setq use-package-ensure-all t)
-(require 'use-package)
-#+end_src
-
 ** Editor Configuration                                          :noexport_1:
 *** Themes
 
 #+begin_src emacs-lisp
 (use-package doom-modeline
-  :ensure t
   :init
   (setq doom-modeline-icon t)
   :config
   (doom-modeline-mode 1))
 
 (use-package doom-themes
-  :ensure t
   :config (load-theme 'doom-nord t))
 
 (use-package solaire-mode
-  :ensure t
   :custom (solaire-mode-remap-fringe t)
   :config
   (solaire-mode-swap-bg)
@@ -332,11 +250,10 @@ Set titlebar style
 *** Icons
 #+begin_src emacs-lisp
 (use-package all-the-icons
-  :ensure t
   :defer 0.5)
 #+end_src
 
-** Buffer Colorize
+* Buffer Colorize
 #+begin_src emacs-lisp
 ;; load package
 (require 'ansi-color)
@@ -351,67 +268,10 @@ Set titlebar style
 ;; add hook to apply the function when magit mode is enabled
 (add-hook 'magit-mode-hook 'colorize-buffer)
 #+end_src
-
-** Speed up Startup
-I’m using an .org file to maintain my GNU Emacs configuration. However, at his launch, it will load the config.el source file for a faster loading.
-
-The code below, executes org-babel-tangle asynchronously when config.org is saved.  Thanks to https://github.com/rememberYou
-#+begin_src emacs-lisp
-(use-package async                                        ;
-  :ensure t)
-
-(defvar *config-file* (expand-file-name "emacs.org" user-emacs-directory)
-  "The configuration file.")
-
-(defvar *config-last-change* (nth 5 (file-attributes *config-file*))
-  "Last modification time of the configuration file.")
-
-(defvar *show-async-tangle-results* nil
-  "Keeps *emacs* async buffers around for later inspection.")
-
-(defun my/config-updated ()
-  "Checks if the configuration file has been updated since the last time."
-  (time-less-p *config-last-change*
-               (nth 5 (file-attributes *config-file*))))
-
-(defun my/config-tangle ()
-  "Tangles the org file asynchronously."
-  (when (my/config-updated)
-    (setq *config-last-change*
-          (nth 5 (file-attributes *config-file*)))
-    (my/async-babel-tangle *config-file*)))
-
-(defun my/async-babel-tangle (org-file)
-  "Tangles the org file asynchronously."
-  (let ((init-tangle-start-time (current-time))
-        (file (buffer-file-name))
-        (async-quiet-switch "-q"))
-    (async-start
-     `(lambda ()
-        (require 'org)
-        (org-babel-tangle-file ,org-file))
-     (unless *show-async-tangle-results*
-       `(lambda (result)
-          (if result
-              (message "SUCCESS: %s successfully tangled (%.2fs)."
-                       ,org-file
-                       (float-time (time-subtract (current-time)
-                                                  ',init-tangle-start-time)))
-            (message "ERROR: %s as tangle failed." ,org-file)))))))
-#+end_src
-
-** Ediff
-We don't want that annoying floating frame that ediff uses by default.
-
-#+begin_src emacs-lisp
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
-#+end_src
-
-** Package Configuration
-*** General
+* Package Configuration
+** General
 #+begin_src emacs-lisp
 (use-package undo-tree
-  :ensure t
   :diminish undo-tree-mode
   :demand
   :config
@@ -419,43 +279,34 @@ We don't want that annoying floating frame that ediff uses by default.
   :bind(("C-z" . undo-tree-undo)
         ("C-M-z" . undo-tree-redo)))
 
-(use-package smex
-  :ensure t)
+(use-package smex)
 
-(use-package dedicated
-  :ensure t)
+(use-package dedicated)
 
 (use-package switch-buffer-functions
-  :ensure t
   :init
   (add-hook 'switch-buffer-functions (lambda (prev cur)
                                        (interactive)
                                        (save-some-buffers t))))
 
-(use-package adaptive-wrap
-  :ensure t)
+(use-package adaptive-wrap)
 
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns x))
-  :ensure t
   :config
   (setq exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-initialize))
 
-(use-package visual-regexp
-  :ensure t)
+(use-package visual-regexp)
 
 (use-package diminish
-  :ensure t
   :config
   (diminish 'auto-revert-mode))
 
 (use-package restclient
-  :ensure t
   :mode ("\\.rest\\'" . restclient-mode))
 
 (use-package company-restclient
-  :ensure t
   :hook (restclient-mode . (lambda ()
                              (add-to-list 'company-backends 'company-restclient))))
 
@@ -464,11 +315,10 @@ We don't want that annoying floating frame that ediff uses by default.
     (mac-auto-operator-composition-mode))
 #+end_src
 
-**** Ace Window Manager
+** Ace Window Manager
 This makes moving around multiple windows a lot easier
 #+begin_src emacs-lisp
 (use-package ace-window
-  :ensure t
   :bind([remap other-window] . ace-window)
   :defer 2
   :init
@@ -479,10 +329,9 @@ This makes moving around multiple windows a lot easier
      ((t (:inherit ace-jump-face-foreground :height 3.0))))))
 #+end_src
 
-**** Yasnippet
+** Yasnippet
 #+begin_src emacs-lisp
 (use-package yasnippet
-  :ensure t
   :defer 1
   :diminish yas-minor-mode
   :hook
@@ -499,20 +348,18 @@ This makes moving around multiple windows a lot easier
   :after yasnippet)
 #+end_src
 
-**** Olivetti
+** Olivetti
 A minor mode for a nice writing environment.  This helps improve general word processing type features
 #+begin_src emacs-lisp
 (use-package olivetti
-  :ensure t
   :defer t
   :init
   (setq olivetti-body-width 80))
 #+end_src
 
-**** SmartParens
+** SmartParens
 #+begin_src emacs-lisp
 (use-package smartparens
-  :ensure t
   :defer 1
   :init
   (require 'smartparens-config)
@@ -521,14 +368,12 @@ A minor mode for a nice writing environment.  This helps improve general word pr
   (smartparens-global-mode 1))
 #+end_src
 
-**** Dired
+** Dired
 These extend the emacs file features a bit to give me a nice sidebar and view when browsing files
 #+begin_src emacs-lisp
-(use-package dired-subtree
-  :ensure t)
+(use-package dired-subtree)
 
-(use-package all-the-icons-dired
-  :ensure t)
+(use-package all-the-icons-dired)
 
 ;;This should allow me to attach messages to mu4e
 ;;Mark the file in dired and press C-c RET C-a and you will be asked
@@ -551,10 +396,9 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
 (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
 #+end_src
 
-**** Projectile
+** Projectile
 #+begin_src emacs-lisp
 (use-package projectile
-  :ensure t
   :defer 2
   :demand
   :bind (:map projectile-mode-map
@@ -569,18 +413,23 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
   (setq projectile-completion-system 'helm)
   (projectile-mode))
 #+end_src
-
-**** Terminal
-There are other terminals available, but vterm seems more responsive and more native of a choice
-#+begin_src emacs-lisp
-(use-package vterm
-  :ensure t
-  :init
-  (defalias 'ansi-term (lambda (&rest _) (call-interactively #'vterm)))
-  (defalias 'term (lambda (&rest _) (call-interactively #'vterm))))
-
+** Terminal
+#+BEGIN_SRC emacs-lisp
+  (setq term-buffer-maximum-size 0)
+#+END_SRC
+Vterm is a term mode that integrates really nicely with emacs keybindings
+#+BEGIN_SRC emacs-lisp
+  (use-package vterm
+    :config
+    (setq vterm-max-scrollback 100000))
+#+END_SRC
+For managing multiple vterm buffers
+#+BEGIN_SRC emacs-lisp
+  (use-package multi-vterm)
+#+END_SRC
+This lets me have a nice frame open with vterm just by hitting C-t
+#+BEGIN_SRC emacs-lisp
 (use-package shell-pop
-  :ensure t
   :bind (("C-t" . shell-pop))
   :config
   (defun shell-pop--set-exit-action ()
@@ -601,200 +450,10 @@ There are other terminals available, but vterm seems more responsive and more na
    '(shell-pop-term-shell "/usr/local/bin/zsh")
    '(shell-pop-window-position "bottom")))
 #+end_src
-
-**** FlyCheck
-#+begin_src emacs-lisp
-(use-package flycheck
-  :ensure t
-  :defer 1
-  :diminish (flycheck-mode . "Fly")
-  :config
-  (add-to-list 'flycheck-checkers 'lsp-ui)
-  :hook
-  (after-init . global-flycheck-mode))
-#+end_src
-**** Spelling and Grammar
-Typing is hard, and sometimes its nice to catch the actual errors.
-#+begin_src emacs-lisp
-(use-package flyspell-correct
-  :ensure t
-  :after flyspell
-  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
-
-(use-package flyspell-correct-helm
-  :ensure t
-  :after flyspell-correct)
-#+end_src
-
-**** MU4E
-My Configuration for mbsync and msmtp can be found in my dotfiles repo here:
-https://github.com/sethmdoty/dotfiles
-#+begin_src emacs-lisp
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e")
-(use-package mu4e
-  :config
-  (setq mu4e-mu-binary "/usr/local/bin/mu")
-  (setq user-full-name "Seth Doty")
-  (setq user-mail-address "sethmdoty@posteo.net")
-  (setq mail-user-agent 'mu4e-user-agent)
-  (setq mu4e-maildir "~/.mbox")
-  (setq mu4e-refile-folder "/posteo/Archive")
-  (setq mu4e-sent-folder "/posteo/Sent")
-  (setq mu4e-trash-folder "/posteo/Trash")
-  (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
-  (setq mu4e-update-interval 300)
-  (setq mu4e-use-fancy-chars t)
-  (setq mail-user-agent 'mu4e-user-agent)
-  (setq mu4e-org-contacts-file "~/org/contacts/contacts.org")
-  ;;Set mu4e as default compose mail program
-  (setq mail-user-agent 'mu4e-user-agent)
-  ;;This integrates choosing mailboxes with helm
-  (setq mu4e-completing-read-function 'completing-read)
-  :config
-  (add-to-list 'mu4e-headers-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
-  (add-to-list 'mu4e-view-actions '("org-contact-add" . mu4e-action-add-org-contact) t)
-  ;; We could get duplicate UIDs from mbsync if we don't do this
-  (setq mu4e-change-filenames-when-moving t)
-  ;; org mode links
-  (setq org-mu4e-link-query-in-headers-mode nil)
-  ;; This enabled the thread like viewing of emails.
-  (setq mu4e-headers-include-related t)
-  (setq mu4e-attachment-dir  "~/Downloads")
-  ;; This prevents saving the email to the Sent folder since my email will do this for us on their end.
-  ;;(setq mu4e-sent-messages-behavior 'delete)
-  ;;so many buffers...
-  (setq message-kill-buffer-on-exit t)
-  ;; Enable inline images.
-  (setq mu4e-view-show-images t)
-  ;; Sometimes html email is just not readable in a text based client, this lets me open the
-  ;; email in my browser.
-  (defun jcs-view-in-eww (msg)
-  (eww-browse-url (concat "file://" (mu4e~write-body-to-html msg))))
-   ;; Arrange to view messages in either the default browser or EWW
-  (add-to-list 'mu4e-view-actions '("ViewInBrowser" . mu4e-action-view-in-browser) t)
-  (add-to-list 'mu4e-view-actions '("Eww view" . jcs-view-in-eww) t)
-  ;; Get some Org functionality in compose buffer
-  ;;(add-hook 'message-mode-hook 'turn-on-orgtbl)
-  ;;(add-hook 'message-mode-hook 'turn-on-orgstruct++)
-  ;; Spell checking, because spelling is hard.
-  (add-hook 'mu4e-compose-mode-hook 'flyspell-mode)
-  ;; Prefer Plain Text over HTML
-  (setq mu4e-view-html-plaintext-ratio-heuristic  most-positive-fixnum)
-  ;;This uses shr2text.  This is a bit better render for email and greatly reduces those weird emails that have a background color that make it through the previous rule
-  ;; https://www.djcbsoftware.nl/code/mu/mu4e/Displaying-rich_002dtext-messages.html
-  (require 'mu4e-contrib)
-  (setq mu4e-html2text-command 'mu4e-shr2text)
-  (setq shr-color-visible-luminance-min 60)
-  (setq shr-color-visible-distance-min 5)
-  (setq shr-use-colors nil)
-  (advice-add #'shr-colorize-region :around (defun shr-no-colourise-region (&rest ignore)))
-  ;;let the text flow
-  (setq mu4e-compose-format-flowed t)
-  (add-hook 'mu4e-compose-mode-hook 'visual-clean)  
-  ;; Configure sending mail.
-  (setq message-send-mail-function 'message-send-mail-with-sendmail
-	sendmail-program "/usr/local/bin/msmtp")
-	
-  ;; Bookmarks for common searches that I use.
-  (setq mu4e-bookmarks '(("(maildir:/icloud/inbox OR maildir:/gmail/inbox OR maildir:/posteo/INBOX)" "Inbox" ?i)
-			 ("flag:unread" "Unread messages" ?u)
-			 ("date:today..now" "Today's messages" ?t)
-			 ("date:7d..now" "Last 7 days" ?w)
-			 ("mime:image/*" "Messages with images" ?p))))
-;; icloud, posteo, and gmail contexts
-(setq mu4e-contexts
-      `( ,(make-mu4e-context
-          :name "gmail"
-          :enter-func (lambda () (mu4e-message "Entering Gmail context"))
-          :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
-          ;; we match based on the maildir of the message
-		  :match-func (lambda (msg)
-                        (when msg
-                          (string-match-p "^/gmail" (mu4e-message-field msg :maildir))))
-          :vars '( ( user-mail-address . "seth.doty@objectpartners.com"  )
-				   (smtpmail-smtp-user . "seth.doty@objectpartners.com")
-				   ( smtpmail-smtp-server . "smtp.gmail.com" )
-                   ( user-full-name . "Seth Doty" )
-				   ( mu4e-trash-folder . "/gmail/[Gmail].Trash" )
-				   ( mu4e-refile-folder . "/gmail/[Gmail].Archive" )
-				   ( mu4e-drafts-folder . "/gmail/[Gmail].Drafts" )
-                   ( mu4e-compose-signature .
-                     (concat
-                       "Seth Doty\n"))))
-       ,(make-mu4e-context
-          :name "posteo"
-          :enter-func (lambda () (mu4e-message "Entering the posteo context"))
-		  :leave-func (lambda () (mu4e-message "Leaving posteo context"))
-          ;; we match based on the maildir of the message
-          :match-func (lambda (msg)
-                        (when msg
-                          (string-match-p "^/posteo" (mu4e-message-field msg :maildir))))
-          :vars '( ( user-mail-address . "sethmdoty@posteo.net" )
-				   ( smtpmail-smtp-user . "sethmdoty@posteo.net" )
-				   ( smtpmail-smtp-server . "" )
-                   ( user-full-name . "Seth Doty" )
-				   ( mu4e-trash-folder . "/posteo/Trash" )
-				   ( mu4e-refile-folder . "/posteo/Archive" )
-				   ( mu4e-drafts-folder . "/posteo/Drafts" )
-                   ( mu4e-compose-signature  .
-                     (concat
-                       "Seth Doty\n"))))
-       ,(make-mu4e-context
-          :name "icloud"
-          :enter-func (lambda () (mu4e-message "Entering the icloud context"))
-		  :leave-func (lambda () (mu4e-message "Leaving icloud context"))
-          ;; we match based on the maildir of the message
-          :match-func (lambda (msg)
-                        (when msg
-                          (string-match-p "^/icloud" (mu4e-message-field msg :maildir))))
-          :vars '( ( user-mail-address . "sethmdoty@icloud.com" )
-				   ( smtpmail-smtp-user . "sethmdoty@icloud.com" )
-				   ( smtpmail-smtp-server . "" )
-                   ( user-full-name . "Seth Doty" )
-				   ( mu4e-trash-folder . "/icloud/Deleted Messages" )
-				   ( mu4e-refile-folder . "/icloud/Archive" )
-				   ( mu4e-drafts-folder . "/icloud/Drafts" )
-                   ( mu4e-compose-signature  .
-                     (concat
-                       "Seth Doty\n"))))))
- 
- (use-package org-mu4e
-    :ensure nil
-    :custom
-    (org-mu4e-convert-to-html t))
-
-;;I need alerts.  this uses the terminal-notifier library for osx.  
-;;Make sure it is in your PATH
-;;Gmail makes poor choices, so I have to specificy an inbox for the alert.....
-(use-package mu4e-alert
-  :ensure t
-  :after mu4e
-  :config
-  (mu4e-alert-set-default-style 'notifier)
-  :hook ((after-init . mu4e-alert-enable-mode-line-display)
-        (after-init . mu4e-alert-enable-notifications)))
-#+end_src
-***** MU4E Encryption
-#+begin_src emacs-lisp
-(require 'mml2015)
-(require 'epa-file)
-
-(defun encrypt-message (&optional arg)
-  (interactive "p")
-  (mml-secure-message-encrypt-pgp))
-
-(defun decrypt-message (&optional arg)
-  (interactive "p")
-  (epa-decrypt-armor-in-region (point-min) (point-max)))
-
-(defalias 'ec 'encrypt-message)
-(defalias 'dc 'decrypt-message)
-#+end_src
-**** Helm
+** Helm
 Helm just makes everything better
 #+begin_src emacs-lisp
 (use-package helm
-  :ensure t
   :demand
   :diminish helm-mode
   :init
@@ -810,7 +469,6 @@ Helm just makes everything better
 
 (use-package helm-swoop
   :after (helm)
-  :ensure t
   :bind
   (("M-i" . helm-swoop)
    ("C-c M-i" . helm-multi-swoop)
@@ -818,7 +476,6 @@ Helm just makes everything better
    ("C-x M-i" . helm-multi-swoop-all)))
 
 (use-package helm-smex
-  :ensure t
   :after (helm smex)
   :init
   (setq helm-smex-show-bindings t)
@@ -826,46 +483,35 @@ Helm just makes everything better
   ("M-X" . helm-smex-major-mode-commands)))
 
 (use-package helm-projectile
-  :ensure t
   :after (projectile helm)
   :config
   (helm-projectile-on))
 
 (use-package helm-flx
-  :ensure t
   :after (helm)
   :config
   (helm-flx-mode 1))
 
 (use-package helm-fuzzier
-  :ensure t
   :after (helm)
   :config
   (helm-fuzzier-mode 1))
 
 (use-package helm-rg
-  :ensure t
-  :after (helm))
-
-(use-package helm-mu
-  :ensure t
   :after (helm))
 
 (use-package helm-org
-  :ensure t
   :defer 10)
 
 (use-package helm-company
-  :ensure t
   :after (helm company)
   :bind (:map company-mode-map ("C-:" . helm-company)
          :map company-active-map ("C-:" . helm-company)))
 #+end_src
 
-**** Git
+** Git
 #+begin_src emacs-lisp
 (use-package magit
-  :ensure t
   :defer 1
   :init
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1 )
@@ -896,26 +542,376 @@ ad-do-it))
   (ad-activate 'magit-git-push))
 
 (use-package forge
-  :ensure t
   :after magit)
 
-(use-package git-link
-  :ensure t)
+(use-package git-link)
 
-(use-package gitignore-mode
-  :ensure t)
+(use-package gitignore-mode)
 
 (use-package diff-hl
-  :ensure t
   :config
   (global-diff-hl-mode))
 #+end_src
-
-**** Org
+** Company
 #+begin_src emacs-lisp
+(use-package company
+  :diminish company-mode
+  :defer 1
+  :delight
+  :config
+  ;; Search other buffers for compleition candidates
+  (setq company-dabbrev-other-buffers t)
+  (setq company-dabbrev-code-other-buffers t)
+
+  ;; Show candidates according to importance, then case, then in-buffer frequency
+  (setq company-transformers '(company-sort-by-backend-importance
+                         company-sort-prefer-same-case-prefix
+                         company-sort-by-occurrence))
+
+   ;; Flushright any annotations for a compleition;
+   ;; e.g., the description of what a snippet template word expands into.
+   company-tooltip-align-annotations t
+  :custom
+  (company-begin-commands '(self-insert-command))
+  (company-idle-delay .1)
+  (company-minimum-prefix-length 2)
+  (company-show-numbers t)
+  (company-tooltip-align-annotations 't)
+
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :after (company)
+  :config
+  (company-quickhelp-mode))
+#+end_src
+** Deft
+I need a better way to search through my org notes.  If I can't find it with this, a ripgrep will usually get the job done.
+#+begin_src emacs-lisp
+(use-package deft
+  :bind ("<f8>" . deft)
+  :commands (deft)
+  :config
+  (setq deft-extensions '("txt" "tex" "org"))
+  (setq deft-directory "~/org")
+  (setq deft-recursive t)
+  (setq deft-use-filename-as-title t))
+#+end_src
+** Treemacs
+Mostly I keep this around for lsp server integration, but its nice for various projects when I have to hop around
+#+begin_src emacs-lisp
+(use-package treemacs
+  :config
+  (global-set-key (kbd "<f12>") 'treemacs)
+  )
+
+(use-package treemacs-projectile
+  :after treemacs projectile)
+
+(use-package treemacs-magit
+  :after treemacs magit)
+
+(use-package lsp-treemacs
+  :after treemacs)
+#+end_src
+
+* Languages
+** Docker
+#+begin_src emacs-lisp
+(use-package docker-compose-mode)
+(use-package dockerfile-mode)
+(use-package dotenv-mode)
+#+end_src
+** Shell
+#+begin_src emacs-lisp
+;;Make sure you have shellcheck installed for this to work
+(use-package flymake-shellcheck
+  :commands flymake-shellcheck-load
+  :init
+  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
+
+;;This makes your shell script executable after you save
+(use-package sh-script
+  :ensure nil
+  :hook (after-save . executable-make-buffer-file-executable-if-script-p))
+#+end_src
+** Golang
+#+begin_src emacs-lisp
+(defun my-go-mode-hook ()
+  (add-hook 'before-save-hook 'gofmt-before-save))
+(use-package go-mode
+  :hook (go-mode-hook my-go-mode-hook))
+(use-package company-go)
+(use-package go-projectile 
+   :demand t)
+(use-package flymake-go)
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+#+end_src
+** LSP Mode
+Lsp allows us to utilize the same interface to multiple languages
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :commands lsp
+  :init
+  (setq lsp-auto-guess-root t
+        lsp-diagnostic-package :flycheck
+        lsp-flycheck-live-reporting nil
+        lsp-enable-snippet nil
+        lsp-log-io nil
+        lsp-signature-auto-activate nil)
+  :config
+  :hook 
+   (js-mode . lsp)
+   (terraform-mode . lsp)
+   (rust-mode . lsp)
+   (python-mode . lsp)
+   (dockerfile-mode . lsp)
+   (go-mode . lsp)
+   (ruby-mode . lsp)
+   (sh-mode . lsp))
+
+(use-package lsp-ui
+  :commands lsp-ui-mode)
+
+(use-package helm-lsp
+  :commands helm-lsp-workspace-symbol)
+#+end_src
+
+** Javascript
+#+begin_src emacs-lisp
+(setq js-switch-indent-offset 2)
+(setq js-indent-level 2)
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . js-mode))
+
+(use-package js2-mode
+  :init
+  (setq js2-mode-show-parse-errors nil)
+  (setq js2-mode-show-strict-warnings nil)
+  :hook
+  (js-mode . js2-minor-mode))
+
+(use-package eslint-fix)
+
+(use-package js2-refactor
+  :hook (js-mode . js2-refactor-mode)
+  :config
+  (js2r-add-keybindings-with-prefix "C-c C-m"))
+
+(use-package add-node-modules-path
+  :hook (js-mode . add-node-modules-path))
+
+(use-package indium
+  :diminish (indium-interaction-mode . "In" )
+  :hook (js-mode . indium-interaction-mode))
+
+(use-package prettier-js
+   :after add-node-modules-path
+   :hook (js-mode . prettier-js-mode))
+#+end_src
+
+** JSON
+#+begin_src emacs-lisp
+;;JSON
+(use-package json-mode
+  :mode (("\\.json\\'" . json-mode)
+   ("\\manifest.webapp\\'" . json-mode )
+   ("\\.tern-project\\'" . json-mode)))
+#+end_src
+
+** Ruby
+#+begin_src emacs-lisp
+(use-package ruby-mode
+  :mode (("\\.rb\\'" . ruby-mode)
+  ("\\.rake\\'" . ruby-mode)
+  ("\\.Rakefile\\'" . ruby-mode)
+  ("\\Gemfile\\'" . ruby-mode)))
+
+(use-package rvm
+  :config
+  (rvm-use-default))
+
+;; a lint checker for ruby
+(use-package rubocop
+  :init
+  (add-hook 'ruby-mode-hook 'rubocop-mode)
+  :diminish rubocop-mode)
+#+end_src
+** Rust
+#+begin_src emacs-lisp
+(use-package rust-mode
+   :init
+   (setq rust-format-on-save t)
+   :hook (add-hook 'rust-mode-hook 'lsp))
+
+(use-package flycheck-rust
+  :hook (flycheck-mode-hook #'flycheck-rust-setup))
+
+(use-package cargo
+  :hook (rust-mode cargo-minor-mode))
+
+;; Toml:
+(use-package toml-mode
+  :defer t
+  :config (progn (add-hook 'toml-mode-hook 'prog-minor-modes-common)))
+
+;;Lets use the new lsp
+(setq lsp-rust-server 'rust-analyzer)
+;;Various quality of life settings for rust
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+(add-hook 'rust-mode-hook 'lsp)
+(add-hook 'rust-mode-hook 'company-mode)
+(add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
+#+end_src
+** Terraform
+#+begin_src emacs-lisp
+(use-package terraform-mode)
+
+(use-package company-terraform
+  :config (company-terraform-init)
+  :hook (add-to-list 'company-backends 'company-terraform))
+#+end_src
+
+** Web
+#+begin_src emacs-lisp
+(use-package web-mode
+  :mode (("\\.phtml\\'" . web-mode)
+   ("\\.tpl\\.php\\'" . web-mode)
+   ("\\.blade\\.php\\'" . web-mode)
+   ("\\.jsp\\'" . web-mode)
+   ("\\.as[cp]x\\'" . web-mode)
+   ("\\.erb\\'" . web-mode)
+   ("\\.html?\\'" . web-mode)
+   ("\\.ejs\\'" . web-mode)
+   ("\\.php\\'" . web-mode)
+   ("\\.mustache\\'" . web-mode)
+   ("/\\(views\\|html\\|theme\\|templates\\)/.*\\.php\\'" . web-mode))
+  :init
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-attr-indent-offset 2)
+  (setq web-mode-attr-value-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-enable-auto-closing t)
+  (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-enable-comment-keywords t)
+  (setq web-mode-enable-current-element-highlight t))
+
+(use-package company-web
+  :hook (web-mode . (lambda ()
+    (add-to-list 'company-backends 'company-web-html)
+    (add-to-list 'company-backends 'company-web-jade)
+    (add-to-list 'company-backends 'company-web-slim))))
+
+(use-package emmet-mode
+  :hook (web-mode sgml-mode html-mode css-mode))
+
+(use-package rainbow-mode
+  :pin gnu
+  :hook css-mode)
+
+(use-package rainbow-delimiters
+  :config
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
+(use-package simple-httpd)
+
+(use-package impatient-mode)
+#+end_src
+
+** Python
+#+begin_src emacs-lisp
+(use-package python
+  :defer t
+  :init
+  (add-hook 'python-mode-hook 'lsp)
+  (setq-default python-shell-interpreter "python3"))
+
+(use-package blacken)
+
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+
+(use-package lsp-python-ms
+:init
+  (setq lsp-python-ms-python-executable-cmd "python3")
+:hook (python-mode . (lambda ()
+                        (require 'lsp-python-ms)
+                        (lsp))))  ; or lsp-deferred
+
+(use-package pyvenv
+  :defer t
+  :init
+  (add-hook 'pyvenv-post-activate-hooks 'lsp-restart-workspace)
+  (add-hook 'pyvenv-post-deactivate-hooks 'lsp-restart-workspace))
+#+end_src
+
+** Markdown
+#+begin_src emacs-lisp
+(use-package markdown-mode
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+   ("\\.md\\'" . markdown-mode)
+   ("\\.markdown\\'" . markdown-mode))
+  :init
+  (setq markdown-command "multimarkdown")
+  (setq markdown-header-scaling t))
+#+end_src
+
+** YAML
+#+begin_src emacs-lisp
+(use-package yaml-mode
+  :mode 
+    ("\\.yaml\\'" . yaml-mode)
+    ("\\.yml\\'" . yaml-mode))
+#+end_src
+* Org
+#+begin_src emacs-lisp
+(use-package ob-restclient)
+(use-package ob-browser)
 (use-package org
-  :ensure org-plus-contrib
-  :pin org
+:demand t
+:mode ("\\.org\\'" . org-mode)
+:preface
+  (defvar my/org-basic-task-template "* TODO %a %^{Task}
+:PROPERTIES:
+:SOURCE:
+:END:
+Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
+
+  (defvar my/org-basic-note-template "* %^{TITLE} 
+:PROPERTIES:
+:SOURCE:
+:END:
+\n%i%?" "Template for basic notes.")1
+
+(defvar my/org-cookbook-template "* %^{Recipe title:}
+  :PROPERTIES:
+  :source-url:
+  :servings:
+  :prep-time:
+  :cook-time:
+  :ready-in:
+  :END:
+  Ingredients\n 
+  %?\n
+  ,** Directions\n")
+
+ (defvar my/org-web-bookmark-template "* %(org-cliplink-capture)
+:PROPERTIES:
+:BOOKMARK:
+:CREATED %U
+:END:")
+
+  (defun my/create-zet-file ()
+    "Create an org file in ~/org/roam"
+    (interactive)
+    (let ((name (read-string "Filename: ")))
+      (expand-file-name (format "%s-%s.org"(format-time-string "%Y%m%d%H%M%S")
+                                  name) "~/org/roam/")))
   :init
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
@@ -932,8 +928,39 @@ ad-do-it))
   (("C-c l" . 'org-store-link)
    ("C-c a" . 'org-agenda)
    ("C-c c" . 'org-capture))
-  :config
-  (setq org-directory "~/org/org-files/")
+
+:config
+(require 'org-habit)
+(require 'org-capture)
+(add-to-list 'org-capture-templates
+             `("s" "Scratch File" entry (file "~/org/scratch/scratch.org")))
+(add-to-list 'org-capture-templates
+             `("l" "Links" entry(file my/create-zet-file),
+      my/org-web-bookmark-template
+      :empty-lines 1))
+(add-to-list 'org-capture-templates
+             `("b" "Cookbook" entry (file "~/org/org-files/cookbook.org")
+      "%(org-chef-get-recipe-from-url)"
+         :empty-lines 1))
+(add-to-list 'org-capture-templates
+             `("m" "Manual Cookbook" entry (file "~/org/org-files/cookbook.org"),
+        my/org-cookbook-template
+        :empty-lines 1))
+(add-to-list 'org-capture-templates
+             `("n" "Notes" entry (file my/create-zet-file),
+      my/org-basic-note-template
+      :empty-lines 1))
+(add-to-list 'org-capture-templates
+             `("j" "Journal entry" entry (function org-journal-find-location)
+       "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?"))
+(add-to-list 'org-capture-templates
+             `("f" "File email (mu4e)" entry (file+headline "~/org/org-files/todo.org" "Email")
+                   "* %a by [[mailto:%:fromaddress][%:fromname]]\n%U\n\n%i%?\n"))
+(add-to-list 'org-capture-templates
+             `("t" "Task" entry (file+headline "~/org/org-files/todo.org" "Tasks"),
+      my/org-basic-task-template
+      :empty-lines 1))
+(setq org-directory "~/org/org-files/")
    ;; Split up the search string on whitespace
   (setq org-agenda-search-view-always-boolean t)
   ;;Do not make last capture bookmarks.  I do not like them
@@ -979,40 +1006,23 @@ ad-do-it))
      (scheme . t)
      (gnuplot . t)
      (plantuml . t)
-     (js . t))))
+     (js . t)))
+(org-reload))
 
-  (use-package org-protocol)
-
-  (use-package org-habit
-    :ensure nil)
-
-  (use-package ob-restclient
-    :ensure t)
-
-  (use-package ob-browser
-    :ensure t)
+(use-package org-plus-contrib
+   :mode (("\\.org$" . org-mode))
+   :bind
+   ("C-c l" . org-store-link)
+   ("C-c a" . org-agenda))
 
   (use-package toc-org
-    :ensure t
     :after org
     :hook (org-mode . toc-org-enable))
 #+end_src
-***** Reformatting an Org Buffer
-From the org mailing list. A function that reformats the current buffer by regenerating the text from its internal parsed representation. 
-#+begin_src emacs-lisp
-(defun my/org-reformat-buffer ()
-  (interactive)
-  (when (y-or-n-p "Really format current buffer? ")
-    (let ((document (org-element-interpret-data (org-element-parse-buffer))))
-      (erase-buffer)
-      (insert document)
-      (goto-char (point-min)))))
-#+end_src
-***** Org-Super-Agenda
+** Org-Super-Agenda
 I primarily use this for cleaning up the agenda view so that I can get better header filtering and remove duplicates in my agenda
 #+begin_src emacs-lisp
 (use-package org-super-agenda
-   :ensure t
    :after org-agenda
    :init
   (setq org-agenda-skip-scheduled-if-done t
@@ -1055,10 +1065,9 @@ I primarily use this for cleaning up the agenda view so that I can get better he
   :config
   (org-super-agenda-mode))
 #+end_src
-***** Org Projectile
+** Org Projectile
 #+begin_src emacs-lisp
 (use-package org-projectile
-  :ensure t
   :bind (("C-c n p" . org-projectile-project-todo-completing-read)
          ("C-c c" . org-capture))
   :config
@@ -1072,48 +1081,29 @@ I primarily use this for cleaning up the agenda view so that I can get better he
     (push (org-projectile-project-todo-entry) org-capture-templates)))
 
 (use-package org-projectile-helm
-  :ensure t
   :after org-projectile
   :bind (("C-c n p" . org-projectile-helm-template-or-project)))
 #+end_src
-***** Org Crypt
-This allows me to encrypt the text of an entry, but not the headline, properties, etc.  Any text below a headline that has a :crypt: tag
-will be automatically encrypted when saved. Preventing tag inheritance prevents encrypted text inside encrypted text.  More can be found in the org
-mode manual here: https://orgmode.org/worg/org-tutorials/encrypting-files.html
-#+begin_src emacs-lisp
-(use-package org-crypt
- :ensure nil
- :config
-   (org-crypt-use-before-save-magic)
-   (setq org-tags-exclude-from-inheritance (quote ("crypt")))
- :custom
-;; GPG key to use for encryption
-;; Either the Key ID or set to nil to use symmetric encryption.
-(org-crypt-key nil))
-#+end_src
-***** Org-cliplink
+** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
 #+begin_src emacs-lisp
 (use-package org-cliplink
-  :ensure t
   :bind ("C-x p i" . org-cliplink))
 #+end_src
-***** Org-Download
+** Org-Download
 https://github.com/abo-abo/org-download Lets me drop and capture images into my org files
 #+begin_src emacs-lisp
 (use-package org-download
-  :ensure t
   :after org
   :bind
   (:map org-mode-map
         (("s-Y" . org-download-screenshot)
          ("s-y" . org-download-yank))))
 #+end_src
-***** Org-Ref
+** Org-Ref
 Captures bibtext entries in an org file, and can look them up online.
 #+begin_src emacs-lisp
 (use-package org-ref
-  :ensure t
   :after org
   :init
   (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
@@ -1122,7 +1112,6 @@ Captures bibtext entries in an org file, and can look them up online.
       org-ref-pdf-directory "~/org/bibliography/bibtex-pdfs/"))
 
 (use-package helm-bibtex
-  :ensure t
   :init
    (setq bibtex-completion-bibliography "~/org/bibliography/references.bib"
       bibtex-completion-library-path "~/org/bibliography/bibtex-pdfs"
@@ -1132,120 +1121,9 @@ Captures bibtext entries in an org file, and can look them up online.
      (lambda (fpath)
        (start-process "open" "*open*" "open" fpath))))
 #+end_src
-***** Org-noter
-Allows me to add notes to documents I can open in emacs.  This is nice because it stores the notes in an org file, not in the document directly like typical annotations
- https://github.com/weirdNox/org-noter
-#+begin_src emacs-lisp
-(use-package org-noter
-  :ensure t)
-#+end_src
-***** Org Capture Templates
-(t) allows me to capture general tasks.  It has some basic link features to show the source
-(l) creates web bookmark entries.  Uses org-cliplink to auto capture the link from your clipboard.  It will prompt for a tag value too.  I'd like at least one by default to ensure that I can search easier later
-(p) allows me to add projects
-(b) Org Cookbook
-(m) Manual Cookbook
-(j) creates a journal entry
-(n) captures the marked text from the active buffer
-(c) is a contact entry
-(f) captures emails I may need to follow up on.  It links directly to the message ID from mu4e
-(s) just a quick capture template for scratch stuff I want to keep for longer than my emacs session
-#+begin_src emacs-lisp
-(defun org-journal-find-location ()
-  ;; Open today's journal, but specify a non-nil prefix argument in order to
-  ;; inhibit inserting the heading; org-capture will insert the heading.
-  (org-journal-new-entry t)
-  ;; Position point on the journal's top-level heading so that org-capture
-  ;; will add the new entry as a child entry.
-  (goto-char (point-min)))
-
-(use-package org-capture
-  :ensure nil
-  :after org
-  :preface
-  (defvar my/org-basic-task-template "* TODO %a %^{Task}
-:PROPERTIES:
-:SOURCE:
-:END:
-Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
-
-  (defvar my/org-basic-note-template "* %^{TITLE} 
-:PROPERTIES:
-:SOURCE:
-:END:
-\n%i%?" "Template for basic notes.")
-
-   (defvar my/org-contacts-template "* %(org-contacts-template-name)
-:PROPERTIES:
-:ADDRESS: %{111 Street Street. Omaha,NE, USA}
-:BIRTHDAY: %{yyyy-mm-dd}
-:EMAIL: %(org-contacts-template-email)
-:NOTE: %^{NOTE}
-:END:" "Template for org-contacts.")
-
-(defvar my/org-cookbook-template "* %^{Recipe title:}
-  :PROPERTIES:
-  :source-url:
-  :servings:
-  :prep-time:
-  :cook-time:
-  :ready-in:
-  :END:
-  Ingredients\n 
-  %?\n
-  ,** Directions\n")
-
- (defvar my/org-web-bookmark-template "* %(org-cliplink-capture)
-:PROPERTIES:
-:BOOKMARK:
-:CREATED %U
-:END:")
-
-  (defun my/create-zet-file ()
-    "Create an org file in ~/org/roam"
-    (interactive)
-    (let ((name (read-string "Filename: ")))
-      (expand-file-name (format "%s-%s.org"(format-time-string "%Y%m%d%H%M%S")
-                                  name) "~/org/roam/")))
-
-  :custom
-  (org-capture-templates
-    `(("l" "Links" entry (file my/create-zet-file),
-      my/org-web-bookmark-template
-      :empty-lines 1)
-
-     ("c" "Contact" entry (file+headline "~/org/contacts/contacts.org" "Contacts"),
-      my/org-contacts-template
-      :empty-lines 1)
-
-     ("b" "Cookbook" entry (file "~/org/org-files/cookbook.org")
-      "%(org-chef-get-recipe-from-url)"
-         :empty-lines 1)
-     
-     ("m" "Manual Cookbook" entry (file "~/org/org-files/cookbook.org"),
-        my/org-cookbook-template
-        :empty-lines 1)
-
-     ("n" "Notes" entry (file my/create-zet-file),
-      my/org-basic-note-template
-      :empty-lines 1)
-
-     ("s" "Scratch File" entry (file "~/org/scratch/scratch.org"))
-
-     ("j" "Journal entry" entry (function org-journal-find-location)
-       "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-
-     ("f" "File email (mu4e)" entry (file+headline "~/org/org-files/todo.org" "Email")
-                   "* %a by [[mailto:%:fromaddress][%:fromname]]\n%U\n\n%i%?\n")
-
-     ("t" "Task" entry (file+headline "~/org/org-files/todo.org" "Tasks"),
-      my/org-basic-task-template
-      :empty-lines 1))))
-#+end_src
-***** Org Roam
+** Org Roam
 #+begin_src emacs-lisp
 (use-package org-roam
-      :ensure t
       :hook (after-init . org-roam-mode)
       :custom
       (org-roam-directory "~/org/roam/")
@@ -1265,15 +1143,13 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
               (("C-c n i" . org-roam-insert))))
 
 (use-package company-org-roam
-      :ensure t
       :config
       (push 'company-org-roam company-backends))
 #+end_src
-***** Org Journal
+** Org Journal
 #+begin_src emacs-lisp
 (use-package org-journal
   :after org
-  :ensure t
   :custom
   (org-journal-date-format "%e %b %Y (%A)")
   (org-journal-enable-agenda-integration t)
@@ -1281,507 +1157,21 @@ Captured %<%Y-%m-%d %H:%M>" "Template for basic task.")
   (org-journal-file-format "%Y%m%d")
   (org-journal-time-format ""))
 #+end_src
-***** Org Contacts
-#+begin_src emacs-lisp
-(use-package org-contacts
-  :ensure nil
-  :after org
-  :custom (org-contacts-files '("~/org/contacts/contacts.org")))
-#+end_src
-***** Org-chef
+** Org-chef
 This package lets me manage recipes in org-mode.  It captures the link from the clipboard and grabs what it can
 #+begin_src emacs-lisp
-(use-package org-chef
-  :ensure t)
+(use-package org-chef)
 #+end_src
-***** Org Superstar
+** Org Superstar
 Its like org-bullets, but better
 #+begin_src emacs-lisp
 (use-package org-superstar
-  :ensure t
   :init
     (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))) 
 #+end_src
-***** Org Reveal
+** Org Reveal
 #+begin_src emacs-lisp
 (use-package ox-reveal
-  :ensure t
   :config
   (setq org-reveal-root "file:///~/Documents/reveal.js"))
-#+end_src
-
-**** Company
-#+begin_src emacs-lisp
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :defer 1
-  :delight
-  :config
-  ;; Search other buffers for compleition candidates
-  (setq company-dabbrev-other-buffers t)
-  (setq company-dabbrev-code-other-buffers t)
-
-  ;; Show candidates according to importance, then case, then in-buffer frequency
-  (setq company-transformers '(company-sort-by-backend-importance
-                         company-sort-prefer-same-case-prefix
-                         company-sort-by-occurrence))
-
-   ;; Flushright any annotations for a compleition;
-   ;; e.g., the description of what a snippet template word expands into.
-   company-tooltip-align-annotations t
-  :custom
-  (company-begin-commands '(self-insert-command))
-  (company-idle-delay .1)
-  (company-minimum-prefix-length 2)
-  (company-show-numbers t)
-  (company-tooltip-align-annotations 't)
-
-  (global-company-mode t))
-
-(use-package company-quickhelp
-  :ensure t
-  :after (company)
-  :config
-  (company-quickhelp-mode))
-#+end_src
-**** Deft
-I need a better way to search through my org notes.  If I can't find it with this, a ripgrep will usually get the job done.
-#+begin_src emacs-lisp
-(use-package deft
-  :ensure t
-  :bind ("<f8>" . deft)
-  :commands (deft)
-  :config
-  (setq deft-extensions '("txt" "tex" "org"))
-  (setq deft-directory "~/org")
-  (setq deft-recursive t)
-  (setq deft-use-filename-as-title t))
-#+end_src
-**** PDF Tools
-PDF Tools is, among other things, a replacement of DocView for PDF files. The key difference is that pages are not pre-rendered by e.g. ghostscript and stored in the file-system, but rather created on-demand and stored in memory.
-#+begin_src emacs-lisp
-(use-package pdf-tools
-  :ensure t
-  :defer t
-  :magic ("%PDF" . pdf-view-mode)
-  :init (pdf-tools-install :no-query))
-
-(use-package pdf-view
-  :ensure nil
-  :after pdf-tools
-  :bind (:map pdf-view-mode-map
-              ("C-s" . isearch-forward)
-              ("d" . pdf-annot-delete)
-              ("h" . pdf-annot-add-highlight-markup-annotation)
-              ("t" . pdf-annot-add-text-annotation))
-  :custom
-  (pdf-view-display-size 'fit-page)
-  (pdf-view-resize-factor 1.1)
-  (pdf-view-use-unicode-ligther nil))
-#+end_src
-*** Languages
-**** Docker
-#+begin_src emacs-lisp
-(use-package docker-compose-mode
-  :ensure t)
-(use-package dockerfile-mode
-  :ensure t)
-(use-package dotenv-mode
-  :ensure t)
-#+end_src
-**** Clojure
-#+begin_src emacs-lisp
-(use-package clojure-mode
-  :ensure t
-  :mode "\\.clj.*$")
-
-(use-package cider
-  :ensure t)
-
-(use-package helm-cider
-  :ensure t
-  :config
-  (helm-cider-mode 1))
-
-(use-package flycheck-clojure
-  :ensure t
-  :init
-  (add-hook 'after-init-hook 'global-flycheck-mode)
-  :config
-  (use-package flycheck
-    :config
-    (flycheck-clojure-setup)))
-#+end_src
-**** Shell
-#+begin_src emacs-lisp
-;;Make sure you have shellcheck installed for this to work
-(use-package flymake-shellcheck
-  :commands flymake-shellcheck-load
-  :init
-  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
-
-;;This makes your shell script executable after you save
-(use-package sh-script
-  :ensure nil
-  :hook (after-save . executable-make-buffer-file-executable-if-script-p))
-#+end_src
-**** Golang
-#+begin_src emacs-lisp
-(defun my-go-mode-hook ()
-  (add-hook 'before-save-hook 'gofmt-before-save))
-(use-package go-mode
-  :ensure t
-  :hook (go-mode-hook my-go-mode-hook))
-(use-package company-go
-  :ensure t)
-(use-package go-projectile
-   :ensure t 
-   :demand t)
-(use-package flymake-go
-  :ensure t)
-(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
-#+end_src
-**** LSP Mode
-Lsp allows us to utilize the same interface to multiple languages
-#+begin_src emacs-lisp
-(use-package lsp-mode
-  :ensure t
-  :commands lsp
-  :init
-  (setq lsp-auto-guess-root t
-        lsp-diagnostic-package :flycheck
-        lsp-enable-snippet nil
-        lsp-flycheck-live-reporting nil
-        lsp-log-io nil
-        lsp-signature-auto-activate nil)
-  :config
-  :hook 
-   (js-mode . lsp)
-   (terraform-mode . lsp)
-   (rust-mode . lsp)
-   (python-mode . lsp)
-   (clojure-mode . lsp)
-   (dockerfile-mode . lsp)
-   (go-mode . lsp)
-   (ruby-mode . lsp)
-   (sh-mode . lsp))
-
-(use-package lsp-rust
-   :after lsp-mode)
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-
-(use-package helm-lsp
-  :ensure t
-  :commands helm-lsp-workspace-symbol)
-#+end_src
-
-**** Javascript
-#+begin_src emacs-lisp
-(setq js-switch-indent-offset 2)
-(setq js-indent-level 2)
-
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js-mode))
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-mode))
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . js-mode))
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . js-mode))
-
-(use-package js2-mode
-  :ensure t
-  :init
-  (setq js2-mode-show-parse-errors nil)
-  (setq js2-mode-show-strict-warnings nil)
-  :hook
-  (js-mode . js2-minor-mode))
-
-(use-package eslint-fix
-  :ensure t)
-
-(use-package js2-refactor
-  :ensure t
-  :hook (js-mode . js2-refactor-mode)
-  :config
-  (js2r-add-keybindings-with-prefix "C-c C-m"))
-
-(use-package add-node-modules-path
-  :ensure t
-  :hook (js-mode . add-node-modules-path))
-
-(use-package indium
-  :ensure t
-  :diminish (indium-interaction-mode . "In" )
-  :hook (js-mode . indium-interaction-mode))
-
-(use-package prettier-js
-   :ensure t
-   :after add-node-modules-path
-   :hook (js-mode . prettier-js-mode))
-#+end_src
-
-**** JSON
-#+begin_src emacs-lisp
-;;JSON
-(use-package json-mode
-  :ensure t
-  :mode (("\\.json\\'" . json-mode)
-   ("\\manifest.webapp\\'" . json-mode )
-   ("\\.tern-project\\'" . json-mode)))
-#+end_src
-
-**** Ruby
-#+begin_src emacs-lisp
-(use-package ruby-mode
-  :ensure t
-  :mode (("\\.rb\\'" . ruby-mode)
-  ("\\.rake\\'" . ruby-mode)
-  ("\\.Rakefile\\'" . ruby-mode)
-  ("\\Gemfile\\'" . ruby-mode)))
-
-(use-package rvm
-  :ensure t
-  :config
-  (rvm-use-default))
-
-;; a lint checker for ruby
-(use-package rubocop
-  :ensure t
-  :init
-  (add-hook 'ruby-mode-hook 'rubocop-mode)
-  :diminish rubocop-mode)
-#+end_src
-**** Rust
-#+begin_src emacs-lisp
-(use-package rust-mode
-   :ensure t
-   :init
-   (setq rust-format-on-save t)
-   :hook (add-hook 'rust-mode-hook 'lsp))
-
-(use-package lsp-rust
-  :demand t
-  :after rust-mode)
-
-(use-package flycheck-rust
-  :ensure t
-  :hook (flycheck-mode-hook #'flycheck-rust-setup))
-
-(use-package cargo
-  :ensure t
-  :hook (rust-mode cargo-minor-mode))
-
-;; Toml:
-(use-package toml-mode
-  :defer t
-  :config (progn (add-hook 'toml-mode-hook 'prog-minor-modes-common)))
-
-;;Lets use the new lsp
-(setq lsp-rust-server 'rust-analyzer)
-;;Various quality of life settings for rust
-(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
-(add-hook 'rust-mode-hook 'lsp)
-(add-hook 'rust-mode-hook 'company-mode)
-(add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
-#+end_src
-**** Terraform
-#+begin_src emacs-lisp
-(use-package terraform-mode
-  :ensure t )
-
-(use-package company-terraform
-  :ensure t
-  :config (company-terraform-init)
-  :hook (add-to-list 'company-backends 'company-terraform))
-#+end_src
-
-**** Web
-#+begin_src emacs-lisp
-(use-package web-mode
-  :ensure t
-  :mode (("\\.phtml\\'" . web-mode)
-   ("\\.tpl\\.php\\'" . web-mode)
-   ("\\.blade\\.php\\'" . web-mode)
-   ("\\.jsp\\'" . web-mode)
-   ("\\.as[cp]x\\'" . web-mode)
-   ("\\.erb\\'" . web-mode)
-   ("\\.html?\\'" . web-mode)
-   ("\\.ejs\\'" . web-mode)
-   ("\\.php\\'" . web-mode)
-   ("\\.mustache\\'" . web-mode)
-   ("/\\(views\\|html\\|theme\\|templates\\)/.*\\.php\\'" . web-mode))
-  :init
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-attr-indent-offset 2)
-  (setq web-mode-attr-value-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-enable-auto-closing t)
-  (setq web-mode-enable-auto-pairing t)
-  (setq web-mode-enable-comment-keywords t)
-  (setq web-mode-enable-current-element-highlight t))
-
-(use-package company-web
-  :ensure t
-  :hook (web-mode . (lambda ()
-    (add-to-list 'company-backends 'company-web-html)
-    (add-to-list 'company-backends 'company-web-jade)
-    (add-to-list 'company-backends 'company-web-slim))))
-
-(use-package emmet-mode
-  :ensure t
-  :hook (web-mode sgml-mode html-mode css-mode))
-
-(use-package rainbow-mode
-  :ensure t
-  :pin gnu
-  :hook css-mode)
-
-(use-package rainbow-delimiters
-  :ensure t
-  :config
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-
-(use-package simple-httpd
-  :ensure t)
-
-(use-package impatient-mode
-  :ensure t)
-#+end_src
-
-**** Python
-#+begin_src emacs-lisp
-(use-package python
-  :defer t
-  :init
-  (add-hook 'python-mode-hook 'lsp)
-  (setq-default python-shell-interpreter "python3"))
-
-(use-package blacken
-  :ensure t)
-
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-
-(use-package lsp-python-ms
-:ensure t
-:init
-  (setq lsp-python-ms-python-executable-cmd "python3")
-:hook (python-mode . (lambda ()
-                        (require 'lsp-python-ms)
-                        (lsp))))  ; or lsp-deferred
-
-(use-package pyvenv
-  :ensure t
-  :defer t
-  :init
-  (add-hook 'pyvenv-post-activate-hooks 'lsp-restart-workspace)
-  (add-hook 'pyvenv-post-deactivate-hooks 'lsp-restart-workspace))
-#+end_src
-
-**** Markdown
-#+begin_src emacs-lisp
-(use-package markdown-mode
-  :ensure t
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md\\'" . gfm-mode)
-   ("\\.md\\'" . markdown-mode)
-   ("\\.markdown\\'" . markdown-mode))
-  :init
-  (setq markdown-command "multimarkdown")
-  (setq markdown-header-scaling t))
-#+end_src
-
-**** Lua
-#+begin_src emacs-lisp
-(use-package lua-mode
-  :ensure t
-  :mode ("\\.lua\\'" . lua-mode))
-
-(use-package company-lua
-  :ensure t
-  :init
-  (add-hook 'lua-mode-hook (lambda ()
-           (add-to-list 'company-backends 'company-lua))))
-#+end_src
-
-**** YAML
-#+begin_src emacs-lisp
-(use-package yaml-mode
-  :ensure t
-  :mode 
-    ("\\.yaml\\'" . yaml-mode)
-    ("\\.yml\\'" . yaml-mode))
-#+end_src
-
-** Review and/or remove
-**** Ledger mode
-I'm experimenting with ledger financial system
-#+begin_src emacs-lisp
-(use-package ledger-mode
-  :ensure t
-  :defer t
-  :mode ("\\.dat\\'"
-         "\\.ledger\\'")
-  :bind (:map ledger-mode-map
-              ("C-x C-s" . my/ledger-save))
-  :hook (ledger-mode . ledger-flymake-enable)
-  :preface
-  (defun my/ledger-save ()
-    "Automatically clean the ledger buffer at each save."
-    (interactive)
-    (ledger-mode-clean-buffer)
-    (save-buffer))
-  :custom
-  (ledger-clear-whole-transactions t)
-  (ledger-reconcile-default-commodity "USD")
-  (ledger-reports
-   '(("account statement" "%(binary) reg --real [[ledger-mode-flags]] -f %(ledger-file) ^%(account)")
-     ("balance sheet" "%(binary) --real [[ledger-mode-flags]] -f %(ledger-file) bal ^assets ^liabilities ^equity")
-     ("budget" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:budget")
-     ("budget goals" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget goals'")
-     ("budget obligations" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget obligations'")
-     ("budget debts" "%(binary) --empty -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^assets:bank ^assets:receivables ^assets:cash ^assets:'budget debts'")
-     ("cleared" "%(binary) cleared [[ledger-mode-flags]] -f %(ledger-file)")
-     ("equity" "%(binary) --real [[ledger-mode-flags]] -f %(ledger-file) equity")
-     ("income statement" "%(binary) --invert --real -S -T [[ledger-mode-flags]] -f %(ledger-file) bal ^income ^expenses -p \"this month\""))
-   (ledger-report-use-header-line nil)))
-
-(use-package flycheck-ledger
-  :ensure t 
-  :after ledger-mode)
-#+end_src
-
-**** Slack
-This is kind of cool, but it is not very quick at times. Store your creds in a .authinfo file with something like
-~~host objectpartners.slack.com user seth.doty@objectpartners.com secret {YOUR-API-KEY}~~
-#+begin_src emacs-lisp
-(use-package slack                      ;
-  :ensure t
-  :commands (slack-start)
-  :init
-  (setq slack-buffer-emojify t) ;; if you want to enable emoji, default nil
-  (setq slack-prefer-current-team t)
-  :config
-(slack-register-team
- :name "objectpartners"
- :default t
- :token (auth-source-pick-first-password
-         :host "objectpartners.slack.com"
-         :user "seth.doty@objectpartners.com"))
-(with-eval-after-load 'tracking
-  (define-key tracking-mode-map [f11]
-    #'tracking-next-buffer))
-;; Ensure the buffer exists when a message arrives on a
-;; channel that wasn't open.
-(setq slack-buffer-create-on-notify t)
-;;Too many status in this UI.  I don't need them and sometimes they display funny
-(defun slack-user-status (_id _team) ""))
-
-(use-package alert
-  :ensure t
-  :commands (alert)
-  :init
-  (setq alert-default-style 'notifier))
 #+end_src
