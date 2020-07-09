@@ -14,5 +14,8 @@ forge-database*
 emacs.el
 auto-save-list/*
 bookmarks
-straight/*
+straight/build/*
+straight/modified/*
+straight/repos/*
+straight/*.el
 org-journal.cache
