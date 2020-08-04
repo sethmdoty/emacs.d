@@ -17,6 +17,7 @@
   - [[#projectile][Projectile]]
   - [[#terminal][Terminal]]
   - [[#helm][Helm]]
+  - [[#ivy][Ivy]]
   - [[#git][Git]]
   - [[#company][Company]]
   - [[#deft][Deft]]
@@ -410,7 +411,7 @@ These extend the emacs file features a bit to give me a nice sidebar and view wh
           (format " Pr[%s]"
                   (projectile-project-name))))
   :config
-  (setq projectile-completion-system 'helm)
+  (setq projectile-completion-system 'ivy)
   (projectile-mode))
 #+end_src
 ** Terminal
@@ -453,60 +454,155 @@ This lets me have a nice frame open with vterm just by hitting C-t
 ** Helm
 Helm just makes everything better
 #+begin_src emacs-lisp
-(use-package helm
-  :demand
-  :diminish helm-mode
-  :init
-  :bind(("C-x f" . helm-recentf)
-  ("C-x b" . helm-mini)
-  ("C-c s" . helm-occur)
-  ("C-c S" . helm-moccur)
-  ("C-x C-b" . helm-buffers-list)
-  ("C-x C-f" . helm-find-files)
-  ("C-x C-r" . helm-resume))
+;; (use-package helm
+;;   :demand
+;;   :diminish helm-mode
+;;   :init
+;;   :bind(("C-x f" . helm-recentf)
+;;   ("C-x b" . helm-mini)
+;;   ("C-c s" . helm-occur)
+;;   ("C-c S" . helm-moccur)
+;;   ("C-x C-b" . helm-buffers-list)
+;;   ("C-x C-f" . helm-find-files)
+;;   ("C-x C-r" . helm-resume))
+;;   :config
+;;   (helm-mode 1))
+
+;; (use-package helm-swoop
+;;   :after (helm)
+;;   :bind
+;;   (("M-i" . helm-swoop)
+;;    ("C-c M-i" . helm-multi-swoop)
+;;    ("M-I" . helm-swoop-back-to-last-point)
+;;    ("C-x M-i" . helm-multi-swoop-all)))
+
+;; (use-package helm-smex
+;;   :after (helm smex)
+;;   :init
+;;   (setq helm-smex-show-bindings t)
+;;   :bind(([remap execute-extended-command] . helm-smex)
+;;   ("M-X" . helm-smex-major-mode-commands)))
+
+;; (use-package helm-projectile
+;;   :after (projectile helm)
+;;   :config
+;;   (helm-projectile-on))
+
+;; (use-package helm-flx
+;;   :after (helm)
+;;   :config
+;;   (helm-flx-mode 1))
+
+;; (use-package helm-fuzzier
+;;   :after (helm)
+;;   :config
+;;   (helm-fuzzier-mode 1))
+
+;; (use-package helm-rg
+;;   :after (helm))
+
+;; (use-package helm-org
+;;   :defer 10)
+
+;; (use-package helm-company
+;;   :after (helm company)
+;;   :bind (:map company-mode-map ("C-:" . helm-company)
+;;          :map company-active-map ("C-:" . helm-company)))
+#+end_src
+** Ivy
+#+begin_src emacs-lisp
+(use-package ivy
+  :diminish
+  :bind (:map ivy-minibuffer-map
+              ("C-w" . ivy-yank-word)           ;; make work like isearch
+              ("C-r" . ivy-previous-line)
+              ("C-x b" . ivy-switch-buffer))
   :config
-  (helm-mode 1))
+  (ivy-mode 1)
+  (setq ivy-initial-inputs-alist nil)           ;; no regexp by default
+  (setq ivy-rich-path-style 'abbrev)
+  (setq ivy-use-virtual-buffers t
+            ivy-count-format "%d/%d ")
+  (setq ivy-re-builders-alist                   ;; allow input not in order
+        '((t . ivy--regex-ignore-order))))
 
-(use-package helm-swoop
-  :after (helm)
-  :bind
-  (("M-i" . helm-swoop)
-   ("C-c M-i" . helm-multi-swoop)
-   ("M-I" . helm-swoop-back-to-last-point)
-   ("C-x M-i" . helm-multi-swoop-all)))
-
-(use-package helm-smex
-  :after (helm smex)
-  :init
-  (setq helm-smex-show-bindings t)
-  :bind(([remap execute-extended-command] . helm-smex)
-  ("M-X" . helm-smex-major-mode-commands)))
-
-(use-package helm-projectile
-  :after (projectile helm)
+(use-package ivy-rich
+  :after ivy
+  :custom
+  (ivy-virtual-abbreviate 'full
+                          ivy-rich-switch-buffer-align-virtual-buffer t
+                          ivy-rich-path-style 'abbrev)
   :config
-  (helm-projectile-on))
+  (ivy-rich-mode 1)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+  (ivy-set-display-transformer 'ivy-switch-buffer
+                               'ivy-rich-switch-buffer-transformer))
 
-(use-package helm-flx
-  :after (helm)
+(use-package all-the-icons-ivy
+  :after (all-the-icons ivy)
+  :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
   :config
-  (helm-flx-mode 1))
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-library)
+  (all-the-icons-ivy-setup))
 
-(use-package helm-fuzzier
-  :after (helm)
-  :config
-  (helm-fuzzier-mode 1))
+(use-package counsel
+  :after ivy
+  :diminish counsel-mode
+  :bind (([remap execute-extended-command] . counsel-M-x)
+         ([remap find-file]                . counsel-find-file)
+         ([remap find-library]             . find-library)
+         ([remap imenu]                    . counsel-imenu)
+         ([remap recentf-open-files]       . counsel-recentf)
+         ([remap org-capture]              . counsel-org-capture)
+         ([remap swiper]                   . counsel-grep-or-swiper) ;; large files
+         ([remap describe-face]            . counsel-describe-face)
+         ([remap describe-function]        . counsel-describe-function)
+         ([remap describe-variable]        . counsel-describe-variable)
+         ;; completion
+         ;; ([remap completion-at-point]      . counsel-company)
+         ;; kill-ring
+         ("M-y"     . counsel-yank-pop)
+         ;; mark-ring
+         ("C-x SPC" . counsel-mark-ring)
+         ;; register
+         ("C-x r"   . counsel-register)
+         ;; ripgrep
+         ("C-c k" . counsel-rg)
+         ;; bookmark (Emacs default; =C-x r b= to create bookmark)
+         ("C-x b"   . counsel-bookmark)
+         ;;switch buffer override
+         ("C-x C-b" . counsel-switch-buffer)
+         ;; code overview
+         ("C-x i"   . counsel-semantic-or-imenu))
+  :config (counsel-mode)
+  :custom (counsel-rg-base-command "rg -S -M 150 --no-heading --line-number --color never %s"))
 
-(use-package helm-rg
-  :after (helm))
+  (use-package counsel-projectile
+    :init
+    (setq projectile-completion-system 'ivy)
+    :config
+    (counsel-projectile-mode t)
+    (defun sk/counsel-ag-project-at-point ()
+      "use counsel ag to search for the word at point in the project"
+      (interactive)
+      (counsel-ag (thing-at-point 'symbol) (projectile-project-root)))
+    (defun sk/counsel-ag-project ()
+      "use counsel ag to search the project"
+      (interactive)
+      (counsel-ag "" (projectile-project-root))))
 
-(use-package helm-org
-  :defer 10)
-
-(use-package helm-company
-  :after (helm company)
-  :bind (:map company-mode-map ("C-:" . helm-company)
-         :map company-active-map ("C-:" . helm-company)))
+(use-package counsel-codesearch)
+(use-package swiper
+      :after ivy
+      :bind (("C-s" . swiper)
+         ("C-r" . swiper)))
+(use-package avy
+  :bind (("C-:" . avy-goto-char)))
+(use-package prescient)
+  (use-package ivy-prescient
+    :config
+    (ivy-prescient-mode t))
 #+end_src
 
 ** Git
@@ -650,31 +746,98 @@ Mostly I keep this around for lsp server integration, but its nice for various p
 ** LSP Mode
 Lsp allows us to utilize the same interface to multiple languages
 #+begin_src emacs-lisp
-(use-package lsp-mode
-  :commands lsp
-  :init
-  (setq lsp-auto-guess-root t
-        lsp-diagnostic-package :flycheck
-        lsp-flycheck-live-reporting nil
-        lsp-enable-snippet nil
-        lsp-log-io nil
-        lsp-signature-auto-activate nil)
-  :config
-  :hook 
-   (js-mode . lsp)
-   (terraform-mode . lsp)
-   (rust-mode . lsp)
-   (python-mode . lsp)
-   (dockerfile-mode . lsp)
-   (go-mode . lsp)
-   (ruby-mode . lsp)
-   (sh-mode . lsp))
+(use-package lsp-mode 
+  :diminish (lsp-mode . "lsp") 
+  :bind (:map lsp-mode-map 
+    ("C-c C-d" . lsp-describe-thing-at-point)) 
+  :hook (
+    (python-mode . #'lsp-deferred) 
+    (js-mode . #'lsp-deferred)
+    (dockerfile-mode . #'lsp-deferred)
+    (terraform-mode . #'lsp-deferred)
+    (sh-mode . #'lsp-deferred)
+    (go-mode-hook . #'lsp-deferred)) 
+  :init 
+  (setq lsp-auto-guess-root t       ; Detect project root 
+   lsp-log-io nil 
+   lsp-enable-indentation t 
+   lsp-enable-imenu t 
+   lsp-keymap-prefix "C-l" 
+   lsp-file-watch-threshold 500 
+   lsp-prefer-flymake nil)      ; Use lsp-ui and flycheck 
+ 
+  (defun lsp-on-save-operation () 
+    (when (or (boundp 'lsp-mode) 
+         (bound-p 'lsp-deferred)) 
+      (lsp-organize-imports) 
+      (lsp-format-buffer))))
 
-(use-package lsp-ui
-  :commands lsp-ui-mode)
+(use-package lsp-ui 
+  :after (lsp-mode) 
+  :commands lsp-ui-doc-hide 
+  :bind (:map lsp-ui-mode-map 
+         ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) 
+         ([remap xref-find-references] . lsp-ui-peek-find-references) 
+         ("C-c u" . lsp-ui-imenu)) 
+  :init (setq lsp-ui-doc-enable t 
+         lsp-ui-doc-use-webkit nil 
+         lsp-ui-doc-header nil 
+         lsp-ui-doc-delay 0.2 
+         lsp-ui-doc-include-signature t 
+         lsp-ui-doc-alignment 'at-point 
+         lsp-ui-doc-use-childframe nil 
+         lsp-ui-doc-border (face-foreground 'default) 
+         lsp-ui-peek-enable t 
+         lsp-ui-peek-show-directory t 
+         lsp-ui-sideline-update-mode 'line 
+         lsp-ui-sideline-enable t 
+         lsp-ui-sideline-show-code-actions t 
+         lsp-ui-sideline-show-hover nil 
+         lsp-ui-sideline-ignore-duplicate t) 
+  :config 
+  (add-to-list 'lsp-ui-doc-frame-parameters '(right-fringe . 8)) 
+ 
+  ;; `C-g'to close doc 
+  (advice-add #'keyboard-quit :before #'lsp-ui-doc-hide) 
+ 
+  ;; Reset `lsp-ui-doc-background' after loading theme 
+  (add-hook 'after-load-theme-hook 
+       (lambda () 
+         (setq lsp-ui-doc-border (face-foreground 'default)) 
+         (set-face-background 'lsp-ui-doc-background 
+                              (face-background 'tooltip)))) 
+ 
+  ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer 
+  ;; @see https://github.com/emacs-lsp/lsp-ui/issues/243 
+  (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate) 
+    (setq mode-line-format nil)))
 
-(use-package helm-lsp
-  :commands helm-lsp-workspace-symbol)
+;; Debug 
+(use-package dap-mode 
+  :diminish dap-mode 
+  :after (lsp-mode) 
+  :functions dap-hydra/nil 
+  :bind (:map lsp-mode-map 
+         ("<f5>" . dap-debug) 
+         ("M-<f5>" . dap-hydra)) 
+  :hook ((dap-mode . dap-ui-mode) 
+    (dap-session-created . (lambda (&_rest) (dap-hydra))) 
+    (dap-terminated . (lambda (&_rest) (dap-hydra/nil))))) 
+ 
+(use-package lsp-treemacs 
+  :after (lsp-mode treemacs) 
+  :commands lsp-treemacs-errors-list 
+  :bind (:map lsp-mode-map 
+         ("M-9" . lsp-treemacs-errors-list))) 
+
+;; (use-package helm-lsp 
+;;   :after (lsp-mode) 
+;;   :commands (helm-lsp-workspace-symbol) 
+;;   :init (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+
+  (use-package lsp-ivy
+    :after (lsp-mode)
+    :commands (lsp-ivy-workspace-symbol))
 #+end_src
 
 ** Javascript
@@ -1080,9 +1243,10 @@ I primarily use this for cleaning up the agenda view so that I can get better he
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
     (push (org-projectile-project-todo-entry) org-capture-templates)))
 
-(use-package org-projectile-helm
-  :after org-projectile
-  :bind (("C-c n p" . org-projectile-helm-template-or-project)))
+;; (use-package org-projectile-helm
+;;   :after org-projectile
+;;   :bind (("C-c n p" . org-projectile-helm-template-or-project)))
+
 #+end_src
 ** Org-cliplink
 org-cliplink lets you insert a link from your clipboard with a title fetched from the pages metadata
@@ -1103,23 +1267,36 @@ https://github.com/abo-abo/org-download Lets me drop and capture images into my 
 ** Org-Ref
 Captures bibtext entries in an org file, and can look them up online.
 #+begin_src emacs-lisp
-(use-package org-ref
-  :after org
-  :init
-  (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
-  (setq org-ref-bibliography-notes "~/org/bibliography/notes.org"
-      org-ref-default-bibliography '("~/org/bibliography/references.bib")
-      org-ref-pdf-directory "~/org/bibliography/bibtex-pdfs/"))
+  (use-package org-ref
+    :after org
+    :init
+    (setq reftex-default-bibliography '("~/org/bibliography/references.bib"))
+    (setq org-ref-bibliography-notes "~/org/bibliography/notes.org"
+        org-ref-default-bibliography '("~/org/bibliography/references.bib")
+        org-ref-pdf-directory "~/org/bibliography/bibtex-pdfs/"))
 
-(use-package helm-bibtex
-  :init
-   (setq bibtex-completion-bibliography "~/org/bibliography/references.bib"
-      bibtex-completion-library-path "~/org/bibliography/bibtex-pdfs"
-      bibtex-completion-notes-path "~/org/bibliography/helm-bibtex-notes")
-   ;; open pdf with system pdf viewer (works on mac)
-   (setq bibtex-completion-pdf-open-function
-     (lambda (fpath)
-       (start-process "open" "*open*" "open" fpath))))
+  ;; (use-package helm-bibtex
+  ;;   :init
+  ;;    (setq bibtex-completion-bibliography "~/org/bibliography/references.bib"
+  ;;       bibtex-completion-library-path "~/org/bibliography/bibtex-pdfs"
+  ;;       bibtex-completion-notes-path "~/org/bibliography/helm-bibtex-notes")
+  ;;    ;; open pdf with system pdf viewer (works on mac)
+  ;;    (setq bibtex-completion-pdf-open-function
+  ;;      (lambda (fpath)
+  ;;        (start-process "open" "*open*" "open" fpath))))
+  (use-package ivy-bibtex
+    :bind ("C-c b b" . ivy-bibtex)
+    :config
+    (setq bibtex-completion-bibliography 
+          '("~/org/bibliography/references.bib"))
+    (setq bibtex-completion-notes-path "~/org/bibliography/helm-bibtex-notes")
+    (setq bibtex-completion-library-path 
+          '(bibtex-completion-library-path "~/org/bibliography/bibtex-pdfs"))
+
+    ;; using bibtex path reference to pdf file
+    (setq bibtex-completion-pdf-field "File")
+
+    (setq ivy-bibtex-default-action 'bibtex-completion-insert-citation))
 #+end_src
 ** Org Roam
 #+begin_src emacs-lisp
@@ -1127,7 +1304,7 @@ Captures bibtext entries in an org file, and can look them up online.
       :hook (after-init . org-roam-mode)
       :custom
       (org-roam-directory "~/org/roam/")
-      (org-roam-completion-system 'helm)
+      (org-roam-completion-system 'ivy)
       (org-roam-capture-templates
       '(("d" "default" plain (function org-roam--capture-get-point)
      "\n-tags::\n%?"
